@@ -53,6 +53,9 @@ body{font-family:Arial,sans-serif;background:#f5f6fa;color:#1a252f;min-height:10
 .unit-row:hover{background:#eef1fa;}
 .unit-row td{padding:8px 12px;font-size:12px;vertical-align:middle;}
 .unit-serial{font-family:monospace;font-size:11px;color:#555;background:#e8eaf0;padding:2px 6px;border-radius:4px;}
+.unit-row-match{background:#fffbe6!important;border-left:3px solid #e67e22;}
+.unit-row-match:hover{background:#fff3cd!important;}
+.unit-row-match .unit-serial{background:#fde8b0;color:#7d4e00;font-weight:700;}
 .btn-request-unit{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:#27ae60;color:#fff;white-space:nowrap;transition:opacity .15s;}
 .btn-request-unit:hover{opacity:.85;}
 .btn-reserve-unit{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:#e67e22;color:#fff;white-space:nowrap;transition:opacity .15s;}
@@ -216,7 +219,7 @@ td{padding:10px 12px;vertical-align:middle;}
     <div class="kpi-row" id="kpi-stock"></div>
     <!-- Controls -->
     <div class="controls">
-      <input type="search" class="search-box" id="s-search" placeholder="Search part # or description..." oninput="renderStock()">
+      <input type="search" class="search-box" id="s-search" placeholder="Search part #, description or serial..." oninput="renderStock()">
       <select class="filter-sel" id="s-office" onchange="renderStock()">
         <option value="">All Offices</option>
         <option>BeNeLux Office</option>
@@ -711,7 +714,14 @@ function renderStock(){
 
   // Base filter (search + office + status dropdown)
   let baseRows=STOCK.filter(r=>{
-    const matchQ=!q||(r.part.toLowerCase().includes(q)||r.description.toLowerCase().includes(q));
+    const matchPartDesc=!q||(r.part.toLowerCase().includes(q)||r.description.toLowerCase().includes(q));
+    const matchSerial=q&&r.units&&r.units.some(u=>u.serial&&u.serial.toLowerCase().includes(q));
+    const matchQ=matchPartDesc||matchSerial;
+    // Auto-expand rows where the query matched a serial but not part/description
+    if(matchSerial&&!matchPartDesc){
+      const idx=STOCK.indexOf(r);
+      _expandedRows['s'+idx]=true;
+    }
     const matchO=!officeF||r.offices.includes(officeF);
     const av=rowAvail(r);
     const tot=rowTotal(r);
@@ -812,13 +822,14 @@ function renderStock(){
         const unitOffice=unit.office||r.offices[0]||'';
         const unitRevision=unit.revision?` <span style="font-size:10px;color:#888;">(${esc(unit.revision)})</span>`:'';
         const unitDesc=unit.description&&unit.description!==r.description?`<div style="font-size:10px;color:#888;margin-top:1px;">${esc(unit.description)}</div>`:'';
+        const isSerialMatch=q&&unit.serial&&unit.serial.toLowerCase().includes(q);
         let unitBtn='';
         if(isAvail){
           unitBtn=`<button class="btn-request-unit" onclick="event.stopPropagation();openCheckoutModalUnit(${idx},${ui})">Request Loan</button>`;
         } else {
           unitBtn=`<button class="btn-reserve-unit" onclick="event.stopPropagation();openReserveModal(${idx})">Reserve</button>`;
         }
-        html+=`<tr class="unit-row">
+        html+=`<tr class="unit-row${isSerialMatch?' unit-row-match':''}">
           <td style="padding-left:28px;color:#ccc;font-size:10px;">&#9492;</td>
           <td><span class="unit-serial">${esc(unitSerial)}</span>${unitRevision}</td>
           <td>${officeChip(unitOffice)}${unitDesc}</td>
