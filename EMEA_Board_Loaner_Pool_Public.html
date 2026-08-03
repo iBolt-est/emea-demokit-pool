@@ -105,10 +105,6 @@ td{padding:10px 12px;vertical-align:middle;}
 .expand-field label{font-size:10px;font-weight:700;text-transform:uppercase;color:#888;display:block;margin-bottom:2px;}
 .expand-field span{color:#1a252f;font-weight:500;}
 
-/* ── Period filter buttons ── */
-.period-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-.period-btn{padding:5px 14px;border-radius:16px;border:1px solid #d0d4dc;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#666;transition:all .15s;}
-.period-btn.active{background:#1a252f;color:#fff;border-color:#1a252f;}
 
 /* ── Action buttons ── */
 .btn-action{padding:5px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;transition:opacity .15s;}
@@ -208,7 +204,6 @@ td{padding:10px 12px;vertical-align:middle;}
 ══════════════════════════════════════════════════════ -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-stock" onclick="switchTab('stock')">&#128230; Available Boards</button>
-  <button class="tab-btn" id="tab-returned" onclick="switchTab('returned')">&#8629; Recently Returned</button>
   <button class="tab-btn" id="tab-info" onclick="switchTab('info')">&#128203; Info &amp; How to Request</button>
 </div>
 
@@ -250,33 +245,6 @@ td{padding:10px 12px;vertical-align:middle;}
           <th>Actions</th>
         </tr></thead>
         <tbody id="tbody-stock"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════
-     PAGE 3: RECENTLY RETURNED
-══════════════════════════════════════════════════════ -->
-<div class="page" id="page-returned">
-  <div class="page-inner">
-    <div class="period-btns" id="period-btns">
-      <button class="period-btn active" onclick="setPeriod(12,this)">Last 12M</button>
-      <button class="period-btn" onclick="setPeriod(24,this)">Last 24M</button>
-      <button class="period-btn" onclick="setPeriod(36,this)">Last 3Y</button>
-      <button class="period-btn" onclick="setPeriod(0,this)">All Time</button>
-    </div>
-    <div class="kpi-row" id="kpi-returned"></div>
-    <div class="table-wrap">
-      <table id="tbl-returned">
-        <thead><tr>
-          <th>Part #</th>
-          <th>Description</th>
-          <th>Shipped</th>
-          <th>Returned</th>
-          <th>Status</th>
-        </tr></thead>
-        <tbody id="tbody-returned"></tbody>
       </table>
     </div>
   </div>
@@ -681,7 +649,6 @@ function switchTab(n){
   document.getElementById('tab-'+n).classList.add('active');
   _expandedRows={};
   if(n==='stock')renderStock();
-  if(n==='returned')renderReturned();
   if(n==='info')renderReqSummary();
 }
 
@@ -1003,48 +970,6 @@ function submitReserve(){
 // ═══════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════
 // TAB 3: RECENTLY RETURNED
-// ═══════════════════════════════════════════════════
-let _retPeriodMonths=12;
-function setPeriod(months,btn){
-  _retPeriodMonths=months;
-  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderReturned();
-}
-
-function renderReturned(){
-  const cutoff=_retPeriodMonths===0?null:new Date(Date.now()-_retPeriodMonths*30*86400000);
-  const filtered=RETURNED.filter(r=>{
-    if(!cutoff)return true;
-    const d=r.returned_iso?new Date(r.returned_iso):null;
-    return d&&d>=cutoff;
-  });
-
-  // KPI
-  const allCountries=new Set(RETURNED.map(r=>r.country).filter(Boolean));
-  const periodCountries=new Set(filtered.map(r=>r.country).filter(Boolean));
-  const uniqueParts=new Set(filtered.map(r=>r.part));
-  document.getElementById('kpi-returned').innerHTML=`
-    <div class="kpi kpi-blue"><div class="kpi-label">Returns in Period</div><div class="kpi-value">${filtered.length}</div></div>
-    <div class="kpi kpi-navy"><div class="kpi-label">All-Time Total</div><div class="kpi-value">${RETURNED.length}</div></div>
-    <div class="kpi kpi-purple"><div class="kpi-label">Unique Board Types</div><div class="kpi-value">${uniqueParts.size}</div></div>
-    <div class="kpi kpi-green"><div class="kpi-label">Countries</div><div class="kpi-value">${periodCountries.size}</div></div>
-  `;
-
-  const tbody=document.getElementById('tbody-returned');
-  if(!filtered.length){tbody.innerHTML='<tr><td colspan="5" class="empty-state">No returns in the selected period.</td></tr>';return;}
-  let html='';
-  filtered.forEach(r=>{
-    html+=`<tr>
-      <td>${partLink(r.part)}</td>
-      <td>${esc(r.description)}</td>
-      <td style="color:#555;font-size:12px;">${fmtMonthYear(r.shipped_iso)||'-'}</td>
-      <td><span class="badge badge-returned">${fmtMonthYear(r.returned_iso)||'-'}</span></td>
-      <td><span class="badge" style="background:#d5e8f5;color:#1a4a6b;">Returned</span></td>
-    </tr>`;
-  });
-  tbody.innerHTML=html;
-}
 
 // ═══════════════════════════════════════════════════
 // localStorage helpers
