@@ -1054,6 +1054,16 @@ function exportToExcel(){
 }
 
 // ── Init ──
+// Pre-fill search from ?search= URL parameter (used by QR code deep-links)
+(function(){
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('search');
+    if (q && q.trim()) {
+      document.getElementById('s-search').value = q.trim();
+    }
+  } catch(e) {}
+})();
 renderStock();
 </script>
 </body>
