@@ -197,8 +197,6 @@ td{padding:10px 12px;vertical-align:middle;}
     <span class="pub-badge">Public View &mdash; Read Only</span>
   </div>
   <div class="header-right">
-    <a href="sa_board_request.html" class="btn-header">&#128203; Fill SA Form</a>
-    <button class="btn-header btn-header-red" onclick="exportToExcel()">&#8601; Export to Excel</button>
   </div>
 </div>
 
@@ -206,7 +204,7 @@ td{padding:10px 12px;vertical-align:middle;}
      TAB BAR
 ══════════════════════════════════════════════════════ -->
 <div class="tab-bar">
-  <button class="tab-btn active" id="tab-stock" onclick="switchTab('stock')">&#128230; Available Boards</button>
+  <button class="tab-btn active" id="tab-stock" onclick="switchTab('stock')">&#128230; Inventory Overview</button>
   <button class="tab-btn" id="tab-info" onclick="switchTab('info')">&#128203; Info &amp; How to Request</button>
 </div>
 
@@ -263,61 +261,11 @@ td{padding:10px 12px;vertical-align:middle;}
     <div class="info-section">
       <h2>How to Request a Board</h2>
       <div class="step-list">
-        <div class="step-item"><div class="step-num">1</div><div class="step-text"><strong>Find the board</strong> — Browse the <em>Available Boards</em> tab and use the search / filter to find the part you need. Check which office holds the unit.</div></div>
+        <div class="step-item"><div class="step-num">1</div><div class="step-text"><strong>Find the board</strong> — Browse the <em>Inventory Overview</em> tab and use the search / filter to find the part you need. Check which office holds the unit.</div></div>
         <div class="step-item"><div class="step-num">2</div><div class="step-text"><strong>Click "Request Loan"</strong> — Click the green button on the row. If all units are checked out, use the amber "Reserve" button to join the queue.</div></div>
         <div class="step-item"><div class="step-num">3</div><div class="step-text"><strong>Fill the form</strong> — Complete all required fields: your name, email, opportunity ID, end-customer details, ship-to address, and loan duration.</div></div>
         <div class="step-item"><div class="step-num">4</div><div class="step-text"><strong>Stock Owner approval</strong> — Your request is sent to the office Stock Owner by email. They will review and confirm availability. Allow 1–2 business days for a response.</div></div>
-        <div class="step-item"><div class="step-num">5</div><div class="step-text"><strong>Board shipped with SA form</strong> — Once approved, the board is shipped with an SA (Shipment Authorization) form. Sign and return this form. See also: <a href="sa_board_request.html" style="color:#ED1C24;">Fill SA Form &#8599;</a> &nbsp;|&nbsp; <a href="board_loaner_pool_flow.html" style="color:#2980b9;">Process Flow Diagram &#8599;</a></div></div>
-      </div>
-    </div>
-
-    <!-- EMEA Office Directory -->
-    <div class="info-section">
-      <h2>&#127968; EMEA Office Directory</h2>
-      <div class="office-card-grid">
-
-        <div class="office-card">
-          <div class="office-card-title"><span class="office-flag">&#127470;&#127466;</span> Dublin Warehouse</div>
-          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Mark van der Bolt<br><a href="mailto:mark.van-der-bolt@amd.com">mark.van-der-bolt@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Therese McDonagh<br><a href="mailto:Therese.McDonagh@amd.com">Therese.McDonagh@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">2020 Biaconi Avenue, CityWest Business Campus<br>D24 T683, Saggart (Co Dublin), Ireland</div></div>
-        </div>
-
-        <div class="office-card">
-          <div class="office-card-title"><span class="office-flag">&#127470;&#127481;</span> Milano Office</div>
-          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Donato Giorgio<br><a href="mailto:Donato.Giorgio@amd.com">Donato.Giorgio@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Valentina Di Menna<br><a href="mailto:valentina.di-menna@amd.com">valentina.di-menna@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Via Riccardo Lombardi No 19/16<br>20153, Milano, Italy</div></div>
-        </div>
-
-        <div class="office-card">
-          <div class="office-card-title"><span class="office-flag">&#127463;&#127466;</span> BeNeLux Office</div>
-          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Arent Steeno<br><a href="mailto:Arent.Steeno@amd.com">Arent.Steeno@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Marijke Vandepitte<br><a href="mailto:marijke.vandepitte@amd.com">marijke.vandepitte@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Villalaan 16<br>9320, Erembodegem (Aalst), Belgium</div></div>
-        </div>
-
-        <div class="office-card">
-          <div class="office-card-title"><span class="office-flag">&#127480;&#127466;</span> Sweden Office</div>
-          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Martin Nissmo<br><a href="mailto:martin.nissmo@amd.com">martin.nissmo@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Anna Stalnacke<br><a href="mailto:anna.stalnacke@amd.com">anna.stalnacke@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Knarrarnasgatan 15<br>16440, Kista, Sweden</div></div>
-        </div>
-
-        <div class="office-card">
-          <div class="office-card-title"><span class="office-flag">&#127465;&#127466;</span> Munich Office</div>
-          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Peter Schillinger<br><a href="mailto:peter.schillinger@amd.com">peter.schillinger@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Renata D'Ettore<br><a href="mailto:Renata.Dettore@amd.com">Renata.Dettore@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Willy-Brandt-Allee 4<br>81829, Munich, Germany</div></div>
-        </div>
-
-        <div class="office-card">
-          <div class="office-card-title"><span class="office-flag">&#127467;&#127479;</span> Paris Office</div>
-          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Ludovic Aubel<br><a href="mailto:ludovic.aubel@amd.com">ludovic.aubel@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Samreet Vuillot<br><a href="mailto:Samreet.Vuillot@amd.com">Samreet.Vuillot@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Bat D, 2 Rue Ren&eacute; Caudron<br>78960, Voisins le Bretonneux, France</div></div>
-        </div>
-
+        <div class="step-item"><div class="step-num">5</div><div class="step-text"><strong>Board shipped with SA form</strong> — Once approved, an SA (Shipment Authorization) form will be filled-in by the Stock owner and forwarded to Logistics for shipment.</div></div>
       </div>
     </div>
 
@@ -358,18 +306,6 @@ td{padding:10px 12px;vertical-align:middle;}
         </div>
 
       </div>
-    </div>
-
-    <!-- Request Data Backup -->
-    <div class="info-section">
-      <h2>&#128190; Your Request Data</h2>
-      <p style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.6;">Your checkout and reserve requests are stored locally in your browser. Use the buttons below to export, import, or clear your request history.</p>
-      <div class="data-actions">
-        <button class="btn-data" onclick="exportRequests()">&#8601; Export Requests (.json)</button>
-        <button class="btn-data" onclick="importRequests()">&#8593; Import Requests (.json)</button>
-        <button class="btn-data btn-data-danger" onclick="clearRequests()">&#128465; Clear All Requests</button>
-      </div>
-      <div id="req-summary" style="font-size:12px;color:#888;"></div>
     </div>
 
   </div>
