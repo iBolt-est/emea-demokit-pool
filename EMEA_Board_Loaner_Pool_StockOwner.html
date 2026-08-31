@@ -47,6 +47,7 @@ body{font-family:Arial,sans-serif;font-size:14px;color:#2c3e50;background:#f5f6f
 
 .page{display:none;padding-top:110px;min-height:100vh;}
 .page.active{display:block;}
+.page-inner{max-width:1240px;margin:0 auto;padding:24px 24px 60px;}
 .kpi-row{display:flex;gap:12px;padding:16px 24px 0;flex-wrap:wrap;background:#f5f6fa;}
 .kpi{background:#fff;border-radius:6px;padding:14px 18px;flex:1;min-width:120px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-top:3px solid #ddd;}
 .kpi .num{font-size:30px;font-weight:700;line-height:1;}
@@ -123,6 +124,9 @@ tr.edit-row td{background:#eaf4fb !important;padding:12px 16px;border-bottom:2px
 .unit-sub-row td{background:#f8fbfe !important;padding:7px 12px;border-bottom:1px solid #e8ecf0;}
 .unit-sub-row:first-of-type td{border-top:1px solid #cde;}
 .unit-sub-row td:first-child{border-left:3px solid #3498db;padding-left:28px;}
+.unit-sub-row-match td{background:#fffbe6 !important;}
+.unit-sub-row-match td:first-child{border-left:3px solid #e67e22 !important;}
+.unit-sub-row-match .unit-serial-val{background:#fde8b0;color:#7d4e00;font-weight:700;padding:1px 5px;border-radius:3px;}
 .unit-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:4px;}
 .unit-avail{background:#d5f5e3;color:#1e6b1e;}
 .unit-out{background:#fadbd8;color:#922b21;}
@@ -197,18 +201,30 @@ tr.edit-row td{background:#eaf4fb !important;padding:12px 16px;border-bottom:2px
 .add-comment-area textarea{width:100%;min-height:80px;padding:8px 10px;border:1px solid #dde;border-radius:4px;font-size:13px;font-family:Arial,sans-serif;resize:vertical;}
 .add-comment-area textarea:focus{border-color:#2980b9;outline:none;}
 
-/* Info page */
-.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:20px 24px 40px;}
-.info-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);overflow:hidden;}
-.ic-head{padding:14px 18px;display:flex;align-items:center;gap:10px;}
-.ic-name{font-size:15px;font-weight:700;color:#1a252f;}
-.ic-sub{font-size:12px;color:#7f8c8d;margin-top:2px;}
-.ic-body{padding:14px 18px;border-top:1px solid #f0f0f0;}
-.ic-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;font-size:12px;}
-.ic-label{color:#888;min-width:64px;flex-shrink:0;}
-.ic-val{color:#2c3e50;font-weight:600;}
-.ic-val a{color:#2980b9;text-decoration:none;}
-.ic-val a:hover{text-decoration:underline;}
+/* ── Info tab ── */
+.info-section{margin-bottom:28px;}
+.info-section h2{font-size:15px;font-weight:700;color:#1a252f;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;border-bottom:2px solid #ED1C24;padding-bottom:6px;}
+.step-list{display:flex;flex-direction:column;gap:8px;}
+.step-item{display:flex;gap:12px;align-items:flex-start;background:#fff;border-radius:7px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+.step-num{width:28px;height:28px;border-radius:50%;background:#ED1C24;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-text{font-size:13px;color:#1a252f;line-height:1.5;}
+.step-text strong{font-weight:700;}
+.office-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.office-card{background:#fff;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,.09);padding:18px;}
+.office-card-title{font-size:14px;font-weight:800;color:#1a252f;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.office-flag{font-size:16px;}
+.office-row{display:flex;gap:8px;margin-bottom:8px;font-size:12px;align-items:flex-start;}
+.office-row-label{font-weight:700;color:#888;min-width:64px;flex-shrink:0;text-transform:uppercase;font-size:10px;padding-top:1px;}
+.office-row-val{color:#1a252f;line-height:1.4;}
+.office-row-val a{color:#2980b9;text-decoration:none;}
+.office-row-val a:hover{text-decoration:underline;}
+
+/* ── Export/Import data ── */
+.data-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.btn-data{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #d0d4dc;background:#fff;color:#1a252f;transition:background .15s;}
+.btn-data:hover{background:#f0f0f5;}
+.btn-data-danger{color:#922b21;border-color:#e8c8c8;}
+.btn-data-danger:hover{background:#fde8e8;}
 
 /* Export/Import bar */
 .data-mgmt-bar{display:flex;gap:10px;padding:12px 24px;background:#fff8e1;border-bottom:1px solid #f5d67e;align-items:center;flex-wrap:wrap;}
@@ -300,7 +316,7 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
   <button class="tab-btn" id="tab-returned" onclick="switchTab('returned')">↩ Returned</button>
   <button class="tab-btn" id="tab-activity" onclick="switchTab('activity')">📈 Board Activity</button>
   <button class="tab-btn" id="tab-notes" onclick="switchTab('notes')">💬 Notes &amp; Comments</button>
-  <button class="tab-btn" id="tab-info" onclick="switchTab('info')">📊 Info &amp; Contacts</button>
+  <button class="tab-btn" id="tab-info" onclick="switchTab('info')">📋 Info &amp; How to Request</button>
 </div>
 
 <!-- Data Management Bar -->
@@ -381,32 +397,6 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
     </table>
   </div>
 
-  <!-- All EMEA Boards collapsible -->
-  <div class="collapsible-header" id="all-emea-toggle" onclick="toggleAllEMEA()">
-    <span id="all-emea-arrow">▶</span>
-    All EMEA Boards in Field (all offices)
-    <span class="count-chip" id="all-emea-count">0</span>
-  </div>
-  <div class="collapsible-content" id="all-emea-content">
-    <div class="table-wrap">
-      <table id="all-emea-table">
-        <thead>
-          <tr>
-            <th>Part #</th>
-            <th>Description</th>
-            <th>Office</th>
-            <th>Receiver</th>
-            <th>Company</th>
-            <th>Country</th>
-            <th>Shipped</th>
-            <th>Days Out</th>
-            <th>SA Number</th>
-          </tr>
-        </thead>
-        <tbody id="all-emea-tbody"></tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
 <!-- PAGE: STOCK OVERVIEW -->
@@ -422,7 +412,7 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
     <span id="s-filter-clear-btn" style="display:none;color:#2980b9;cursor:pointer;font-size:11px;" onclick="setStockKpi('total')">✕ Clear filter</span>
   </div>
   <div class="controls">
-    <input type="text" id="s-search" placeholder="Search part, description, location…" oninput="renderStock()">
+    <input type="text" id="s-search" placeholder="Search part, description, location, serial…" oninput="renderStock()">
     <select id="s-office" onchange="renderStock()">
       <option value="">All Offices</option>
       <option value="Dublin Warehouse">Dublin Warehouse</option>
@@ -571,9 +561,124 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
   </div>
 </div>
 
-<!-- PAGE: INFO & CONTACTS -->
+<!-- PAGE: INFO & HOW TO REQUEST -->
 <div class="page" id="page-info" style="padding-top:155px;">
-  <div class="info-grid" id="info-grid"></div>
+  <div class="page-inner">
+
+    <!-- How to Request -->
+    <div class="info-section">
+      <h2>How to Request a Board</h2>
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-text"><strong>Find the board</strong> — Browse the <em>Inventory Overview</em> tab and use the search / filter to find the part you need. Check which office holds the unit.</div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-text"><strong>Click "Request Loan"</strong> — Click the green button on the row. If all units are checked out, use the amber "Reserve" button to join the queue.</div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-text"><strong>Fill the form</strong> — Complete all required fields: your name, email, opportunity ID, end-customer details, ship-to address, and loan duration.</div></div>
+        <div class="step-item"><div class="step-num">4</div><div class="step-text"><strong>Stock Owner approval</strong> — Your request is sent to the office Stock Owner by email. They will review and confirm availability. Allow 1–2 business days for a response.</div></div>
+        <div class="step-item"><div class="step-num">5</div><div class="step-text"><strong>Board shipped with SA form</strong> — Once approved, the board is shipped with an SA (Shipment Authorization) form. Sign and return this form. See also: <a href="sa_board_request.html" style="color:#ED1C24;">Fill SA Form &#8599;</a> &nbsp;|&nbsp; <a href="board_loaner_pool_flow.html" style="color:#2980b9;">Process Flow Diagram &#8599;</a></div></div>
+      </div>
+    </div>
+
+    <!-- EMEA Office Directory -->
+    <div class="info-section">
+      <h2>&#127968; EMEA Office Directory</h2>
+      <div class="office-card-grid">
+
+        <div class="office-card">
+          <div class="office-card-title"><span class="office-flag">&#127470;&#127466;</span> Dublin Warehouse</div>
+          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Mark van der Bolt<br><a href="mailto:mark.van-der-bolt@amd.com">mark.van-der-bolt@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Therese McDonagh<br><a href="mailto:Therese.McDonagh@amd.com">Therese.McDonagh@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">2020 Biaconi Avenue, CityWest Business Campus<br>D24 T683, Saggart (Co Dublin), Ireland</div></div>
+        </div>
+
+        <div class="office-card">
+          <div class="office-card-title"><span class="office-flag">&#127470;&#127481;</span> Milano Office</div>
+          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Donato Giorgio<br><a href="mailto:Donato.Giorgio@amd.com">Donato.Giorgio@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Valentina Di Menna<br><a href="mailto:valentina.di-menna@amd.com">valentina.di-menna@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Via Riccardo Lombardi No 19/16<br>20153, Milano, Italy</div></div>
+        </div>
+
+        <div class="office-card">
+          <div class="office-card-title"><span class="office-flag">&#127463;&#127466;</span> BeNeLux Office</div>
+          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Arent Steeno<br><a href="mailto:Arent.Steeno@amd.com">Arent.Steeno@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Marijke Vandepitte<br><a href="mailto:marijke.vandepitte@amd.com">marijke.vandepitte@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Villalaan 16<br>9320, Erembodegem (Aalst), Belgium</div></div>
+        </div>
+
+        <div class="office-card">
+          <div class="office-card-title"><span class="office-flag">&#127480;&#127466;</span> Sweden Office</div>
+          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Martin Nissmo<br><a href="mailto:martin.nissmo@amd.com">martin.nissmo@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Anna Stalnacke<br><a href="mailto:anna.stalnacke@amd.com">anna.stalnacke@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Knarrarnasgatan 15<br>16440, Kista, Sweden</div></div>
+        </div>
+
+        <div class="office-card">
+          <div class="office-card-title"><span class="office-flag">&#127465;&#127466;</span> Munich Office</div>
+          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Peter Schillinger<br><a href="mailto:peter.schillinger@amd.com">peter.schillinger@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Renata D'Ettore<br><a href="mailto:Renata.Dettore@amd.com">Renata.Dettore@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Willy-Brandt-Allee 4<br>81829, Munich, Germany</div></div>
+        </div>
+
+        <div class="office-card">
+          <div class="office-card-title"><span class="office-flag">&#127467;&#127479;</span> Paris Office</div>
+          <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Ludovic Aubel<br><a href="mailto:ludovic.aubel@amd.com">ludovic.aubel@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Samreet Vuillot<br><a href="mailto:Samreet.Vuillot@amd.com">Samreet.Vuillot@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Bat D, 2 Rue Ren&eacute; Caudron<br>78960, Voisins le Bretonneux, France</div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Verification Guidance -->
+    <div class="info-section">
+      <h2>&#9989; Verification Guidance &mdash; Before Returning Boards to Pool</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:14px;">
+
+        <div style="background:#fff;border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.09);padding:18px 20px;">
+          <div style="font-size:13px;font-weight:700;color:#1a252f;margin-bottom:12px;">&#128203; 1. Verify Completeness of Kit Contents</div>
+          <p style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;">Use the <em>'Kit Contents'</em> paper in the box (when available) to verify all items are included. If this paper is lost, refer to the Getting Started Guide / Kit Contents documentation.</p>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="background:#d5f5e3;border-radius:5px;padding:8px 12px;font-size:12px;color:#1e6b1e;"><strong>&#10003; If Complete</strong> &mdash; OK to proceed</div>
+            <div style="background:#fdebd0;border-radius:5px;padding:8px 12px;font-size:12px;color:#784212;"><strong>&#9888; If Incomplete</strong> &mdash; Verify with customer; attempt to recover missing items</div>
+            <div style="background:#fadbd8;border-radius:5px;padding:8px 12px;font-size:12px;color:#922b21;"><strong>&#10007; If unsuccessful</strong> &mdash; Inform stock owner to register missing items and advise on further guidance</div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.09);padding:18px 20px;">
+          <div style="font-size:13px;font-weight:700;color:#1a252f;margin-bottom:12px;">&#128295; 2. AMD/Xilinx Devkit Functional Hardware Tests</div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:#2980b9;margin-bottom:6px;">Basic Hardware Bring-up</div>
+            <p style="font-size:12px;color:#555;margin-bottom:8px;line-height:1.6;">Run the <strong>BIST (Built-In Self Test)</strong> application (except ES versions where BIST is often unavailable). Perform the relevant tests and observe results.</p>
+            <p style="font-size:12px;color:#555;margin-bottom:8px;line-height:1.6;">Reference: <a href="https://xilinx-wiki.atlassian.net/wiki/spaces/A/overview?homepageId=18844350" target="_blank" style="color:#2980b9;text-decoration:underline;">AMD Adaptive Computing Wiki &#8599;</a></p>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div style="background:#d5f5e3;border-radius:5px;padding:7px 12px;font-size:12px;color:#1e6b1e;"><strong>&#10003; All tests pass</strong> &mdash; OK to proceed</div>
+              <div style="background:#fadbd8;border-radius:5px;padding:7px 12px;font-size:12px;color:#922b21;"><strong>&#10007; Not fully successful</strong> &mdash; Inform stock owner to register issues</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#8e44ad;margin-bottom:6px;">Advanced Bring-up <span style="font-weight:400;color:#aaa;">(Optional)</span></div>
+            <p style="font-size:12px;color:#555;margin-bottom:8px;line-height:1.6;">Bring-up using the <strong>Base Targeted Reference Design</strong> and verify correct functionality.</p>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div style="background:#d5f5e3;border-radius:5px;padding:7px 12px;font-size:12px;color:#1e6b1e;"><strong>&#10003; Successful</strong> &mdash; OK to proceed</div>
+              <div style="background:#fadbd8;border-radius:5px;padding:7px 12px;font-size:12px;color:#922b21;"><strong>&#10007; Not fully successful</strong> &mdash; Inform stock owner to register issues and advise further</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Request Data Backup -->
+    <div class="info-section">
+      <h2>&#128190; Your Request Data</h2>
+      <p style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.6;">Your checkout and reserve requests are stored locally in your browser. Use the buttons below to export, import, or clear your request history.</p>
+      <div class="data-actions">
+        <button class="btn-data" onclick="exportRequests()">&#8601; Export Requests (.json)</button>
+        <button class="btn-data" onclick="importRequests()">&#8593; Import Requests (.json)</button>
+        <button class="btn-data btn-data-danger" onclick="clearRequests()">&#128465; Clear All Requests</button>
+      </div>
+      <div id="req-summary" style="font-size:12px;color:#888;"></div>
+    </div>
+
+  </div>
 </div>
 
 </div><!-- /app -->
@@ -1392,9 +1497,6 @@ function renderHub(){
   // Update section title count chip
   setHubFilter(_hubFilter); // re-apply active filter (preserves user selection across re-renders)
 
-  // All EMEA count
-  document.getElementById('all-emea-count').textContent = _fieldData.length;
-  renderAllEMEA();
 }
 
 
@@ -1425,34 +1527,6 @@ function officeMatch(a, b){
   return na===nb || na.includes(nb) || nb.includes(na);
 }
 
-function renderAllEMEA(){
-  const tbody = document.getElementById('all-emea-tbody');
-  if(_fieldData.length===0){
-    tbody.innerHTML='<tr><td colspan="9" class="no-results">No boards currently in the field.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = _fieldData.map(r=>{
-    const days=daysAgo(r.shipped_iso);
-    return `<tr>
-      <td class="b-part">${partLink(r.part)}</td>
-      <td class="b-name">${esc(r.description)}</td>
-      <td>${officeChip(r.owner||r.office||'')}</td>
-      <td>${esc(r.receiver||'—')}</td>
-      <td>${esc(r.company||'—')}</td>
-      <td>${esc(r.country||'—')}</td>
-      <td>${esc(r.shipped_date||'—')}</td>
-      <td>${ageBadge(days)}</td>
-      <td>${esc(r.sa_number||'—')}</td>
-    </tr>`;
-  }).join('');
-}
-
-function toggleAllEMEA(){
-  const content = document.getElementById('all-emea-content');
-  const arrow   = document.getElementById('all-emea-arrow');
-  const open = content.classList.toggle('open');
-  arrow.textContent = open ? '▼' : '▶';
-}
 
 // ══════════════════════════════════════════════════════════════
 // STOCK OVERVIEW TAB
@@ -1562,12 +1636,16 @@ function renderStock(){
   let rows = _stockData.filter(r=>{
     const matchOffice = !office || (r.offices||[]).some(o=>officeMatch(o,office)) || officeMatch(r.office||'',office);
     if(!matchOffice) return false;
+    const matchesSerial = search && (r.units||[]).some(u=>(u.serial||'').toLowerCase().includes(search));
     if(search && !(
       (r.part||'').toLowerCase().includes(search)||
       (r.description||'').toLowerCase().includes(search)||
       (r.location||'').toLowerCase().includes(search)||
-      (r.notes||'').toLowerCase().includes(search)
+      (r.notes||'').toLowerCase().includes(search)||
+      matchesSerial
     )) return false;
+    // Auto-expand rows matched via serial
+    if(matchesSerial){ const si=_stockData.indexOf(r); _stockExpanded.add(si); }
     // Apply KPI filter
     if(_stockKpiFilter==='available'){
       // Keep rows that have at least one available unit in the active office
@@ -1587,7 +1665,8 @@ function renderStock(){
     return (r.part||'').toLowerCase().includes(search)||
            (r.description||'').toLowerCase().includes(search)||
            (r.location||'').toLowerCase().includes(search)||
-           (r.notes||'').toLowerCase().includes(search);
+           (r.notes||'').toLowerCase().includes(search)||
+           (r.units||[]).some(u=>(u.serial||'').toLowerCase().includes(search));
   });
   const kpiRows = office ? baseRows : _stockData;
   const allTotal = kpiRows.reduce((s,r)=>{
@@ -1685,7 +1764,8 @@ function renderStock(){
               : '<button class="return-btn" style="font-size:10px;padding:3px 8px;margin-right:3px;" onclick="openCheckinUnit(' + si + ',' + ui + ')">Check-in</button>'
                 + '<button class="reserve-btn" style="font-size:10px;padding:3px 8px;" onclick="requestReturnUnit(' + si + ',' + ui + ')">&#128231; Request Return</button>')
           : '<span style="font-size:11px;color:#bbb;">View only</span>';
-        html += '<tr class="unit-sub-row' + (isOwnUnit?'':' unit-readonly') + '">';
+        const isSerialMatch = search && (u.serial||'').toLowerCase().includes(search);
+        html += '<tr class="unit-sub-row' + (isOwnUnit?'':' unit-readonly') + (isSerialMatch?' unit-sub-row-match':'') + '">';
         html += '<td class="edit-col" onclick="event.stopPropagation()">' + uEditCell + '</td>';
         html += '<td style="padding-left:14px;font-size:12px;color:#7c3aed;font-weight:700;">Unit ' + (ui+1) + '</td>';
         html += '<td style="font-size:12px;color:#555;">' + esc(u.office||'—') + '</td>';
@@ -1693,7 +1773,7 @@ function renderStock(){
         html += '<td>' + statusBadge + '</td>';
         html += '<td style="font-size:11px;color:#555;">' + esc(u.owner||'') + '</td>';
         html += '<td style="font-size:11px;">' + esc(u.location||'') + '</td>';
-        html += '<td style="font-size:11px;color:#555;">' + esc(u.serial||'—') + '</td>';
+        html += '<td style="font-size:11px;color:#555;"><span class="' + (isSerialMatch?'unit-serial-val':'') + '">' + esc(u.serial||'—') + '</span></td>';
         html += '<td style="font-size:12px;">' + esc(u.notes||'') + (u.loaned_to?'<br><span style="font-size:10px;color:#e67e22;">Loaned to: '+esc(u.loaned_to)+'</span>':'') + '</td>';
         html += '<td class="actions-cell" style="white-space:nowrap;">' + uActionCell + '</td>';
         html += '</tr>';
@@ -2124,33 +2204,61 @@ function postComment(part){
 }
 
 // ══════════════════════════════════════════════════════════════
-// INFO & CONTACTS TAB
+// INFO & HOW TO REQUEST TAB
 // ══════════════════════════════════════════════════════════════
-const OFFICE_INFO=[
-  {name:'Dublin Warehouse',owner:'Mark van der Bolt',email:'mark.van-der-bolt@amd.com',logistics:'EMEA Central Hub'},
-  {name:'Milano Office',owner:'Donato Giorgio',email:'Donato.Giorgio@amd.com',logistics:'IT Hub'},
-  {name:'BeNeLux Office',owner:'Arent Steeno',email:'Arent.Steeno@amd.com',logistics:'BE/NL/LU'},
-  {name:'Sweden/Kista Office',owner:'Martin Nissmo',email:'martin.nissmo@amd.com',logistics:'Nordic'},
-  {name:'Munich Office',owner:'Peter Schillinger',email:'peter.schillinger@amd.com',logistics:'DACH'},
-  {name:'Paris Office',owner:'Ludovic Aubel',email:'ludovic.aubel@amd.com',logistics:'FR'},
-];
-
 function renderInfo(){
-  const grid=document.getElementById('info-grid');
-  grid.innerHTML=OFFICE_INFO.map(o=>`
-    <div class="info-card">
-      <div class="ic-head">
-        <div>
-          <div class="ic-name">${esc(o.name)}</div>
-          <div class="ic-sub">${esc(o.logistics)}</div>
-        </div>
-      </div>
-      <div class="ic-body">
-        <div class="ic-row"><span class="ic-label">Owner</span><span class="ic-val">${esc(o.owner)}</span></div>
-        <div class="ic-row"><span class="ic-label">Email</span><span class="ic-val"><a href="mailto:${esc(o.email)}">${esc(o.email)}</a></span></div>
-      </div>
-    </div>
-  `).join('');
+  // Static HTML — just refresh the request summary if present
+  renderReqSummary();
+}
+
+function getRequests(){try{return JSON.parse(localStorage.getItem('emea_requests')||'[]');}catch(e){return [];}}
+
+function renderReqSummary(){
+  const el=document.getElementById('req-summary');
+  if(!el)return;
+  const reqs=getRequests();
+  el.textContent=reqs.length?`${reqs.length} request(s) stored locally.`:'No requests stored.';
+}
+
+function exportRequests(){
+  const reqs=getRequests();
+  if(!reqs.length){alert('No requests to export.');return;}
+  const blob=new Blob([JSON.stringify(reqs,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='emea_requests_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+function importRequests(){
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='.json';
+  input.onchange=e=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const imported=JSON.parse(ev.target.result);
+        if(!Array.isArray(imported)){alert('Invalid format.');return;}
+        const existing=getRequests();
+        const merged=[...existing,...imported];
+        localStorage.setItem('emea_requests',JSON.stringify(merged));
+        renderReqSummary();
+        alert(`Imported ${imported.length} request(s).`);
+      }catch(err){alert('Could not parse file: '+err.message);}
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function clearRequests(){
+  if(!confirm('Clear all locally stored requests? This cannot be undone.'))return;
+  localStorage.removeItem('emea_requests');
+  renderReqSummary();
+  alert('All requests cleared.');
 }
 
 // ══════════════════════════════════════════════════════════════
