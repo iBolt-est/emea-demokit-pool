@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EMEA Demokit Pool — Dashboard Hub</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;background:#0d1117;color:#fff;min-height:100vh;display:flex;flex-direction:column;}
+
+  /* ── Header ── */
+  .header{background:#000;padding:0 32px;height:68px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #222;}
+  .header-brand{display:flex;align-items:center;gap:14px;}
+  .amd-logo{font-size:22px;font-weight:900;letter-spacing:-.5px;color:#fff;}
+  .amd-logo span{color:#ED1C24;}
+  .divider{width:1px;height:28px;background:#333;}
+  .header-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.65);letter-spacing:.04em;text-transform:uppercase;}
+  .badge{background:#ED1C24;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.06em;text-transform:uppercase;}
+
+  /* ── Hero ── */
+  .hero{padding:56px 32px 40px;max-width:900px;margin:0 auto;width:100%;text-align:center;}
+  .hero h1{font-size:32px;font-weight:800;line-height:1.2;margin-bottom:12px;letter-spacing:-.02em;}
+  .hero h1 em{font-style:normal;color:#ED1C24;}
+  .hero p{font-size:15px;color:rgba(255,255,255,.55);max-width:560px;margin:0 auto;line-height:1.6;}
+
+  /* ── Cards Grid ── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:900px;margin:0 auto;padding:0 32px 64px;width:100%;}
+
+  .card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:28px 24px;display:flex;flex-direction:column;gap:14px;text-decoration:none;color:#fff;transition:border-color .18s,transform .18s,box-shadow .18s;position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,#ED1C24);}
+  .card:hover{border-color:var(--accent,#ED1C24);transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.4);}
+
+  .card-icon{font-size:28px;line-height:1;}
+  .card-title{font-size:16px;font-weight:700;line-height:1.2;}
+  .card-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.55;flex:1;}
+  .card-cta{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--accent,#ED1C24);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+  .card-cta::after{content:'→';}
+  .card-tag{position:absolute;top:16px;right:16px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);}
+
+  /* ── Footer ── */
+  .footer{margin-top:auto;border-top:1px solid #1e2530;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:gap;gap:8px;}
+  .footer-left{font-size:11px;color:rgba(255,255,255,.3);}
+  .footer-right{font-size:11px;color:rgba(255,255,255,.2);}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-brand">
+    <div class="amd-logo">AM<span>D</span></div>
+    <div class="divider"></div>
+    <div class="header-title">EMEA Demokit Pool</div>
+  </div>
+  <div class="badge">Internal</div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>EMEA Channel Demokit Pool<br><em>Dashboard Hub</em></h1>
+  <p>Central access point for all demokit pool dashboards. Select the view that matches your role and needs.</p>
+</div>
+
+<!-- Cards -->
+<div class="grid">
+
+  <a class="card" href="EMEA_Board_Loaner_Pool_Public.html" style="--accent:#ED1C24;">
+    <span class="card-tag">Public</span>
+    <div class="card-icon">🖥️</div>
+    <div class="card-title">Board Loaner Pool</div>
+    <div class="card-desc">Full public-facing view of the EMEA board loaner pool — stock levels, availability by board type, and field status.</div>
+    <div class="card-cta">Open dashboard</div>
+  </a>
+
+  <a class="card" href="EMEA_Board_Loaner_Pool_StockOwner.html" style="--accent:#00C2DE;">
+    <span class="card-tag">Stock Owner</span>
+    <div class="card-icon">📦</div>
+    <div class="card-title">Stock Owner View</div>
+    <div class="card-desc">Manage and update board inventory. Intended for stock owners and warehouse managers with edit access.</div>
+    <div class="card-cta">Open dashboard</div>
+  </a>
+
+  <a class="card" href="Board_Management_Pro_Dashboard.html" style="--accent:#C1A968;">
+    <span class="card-tag">Pro</span>
+    <div class="card-icon">📊</div>
+    <div class="card-title">Pro Management Dashboard</div>
+    <div class="card-desc">Advanced board management view with detailed analytics, filtering, and full dataset access.</div>
+    <div class="card-cta">Open dashboard</div>
+  </a>
+
+  <a class="card" href="Board_Management_InStock_Dashboard.html" style="--accent:#27ae60;">
+    <span class="card-tag">In-Stock</span>
+    <div class="card-icon">✅</div>
+    <div class="card-title">In-Stock Dashboard</div>
+    <div class="card-desc">Quick view of boards currently in stock across all locations — filtered for availability tracking.</div>
+    <div class="card-cta">Open dashboard</div>
+  </a>
+
+  <a class="card" href="sa_board_request.html" style="--accent:#F26522;">
+    <span class="card-tag">Request</span>
+    <div class="card-icon">📋</div>
+    <div class="card-title">Board Request Form</div>
+    <div class="card-desc">Submit a demokit board loan request. For Sales Associates and channel partners requesting boards.</div>
+    <div class="card-cta">Open form</div>
+  </a>
+
+  <a class="card" href="Board_Management_Dashboard.html" style="--accent:#8e44ad;">
+    <span class="card-tag">Classic</span>
+    <div class="card-icon">🗂️</div>
+    <div class="card-title">Classic Dashboard</div>
+    <div class="card-desc">Original board management dashboard with standard filtering and export capabilities.</div>
+    <div class="card-cta">Open dashboard</div>
+  </a>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-left">AMD EMEA Channel — Demokit Pool Management · Internal Use Only</div>
+  <div class="footer-right">together we advance_</div>
+</div>
+
+</body>
+</html>
