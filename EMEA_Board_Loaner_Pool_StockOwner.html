@@ -338,6 +338,12 @@ th.sort-desc::after{content:'▼';opacity:1;}
   </div>
 </div>
 
+<!-- Conflict / Stale Banner — shown when external changes are detected -->
+<div id="conflict-banner" style="display:none;position:fixed;top:130px;left:0;right:0;z-index:900;background:#c0392b;color:#fff;padding:10px 24px;font-size:13px;font-weight:600;align-items:center;gap:12px;box-shadow:0 3px 10px rgba(0,0,0,.3);">
+  <span id="conflict-banner-msg"></span>
+  <button onclick="reloadAndResume()" style="margin-left:auto;padding:6px 18px;background:#fff;color:#c0392b;border:none;border-radius:4px;font-weight:700;cursor:pointer;white-space:nowrap;">↺ Reload Now</button>
+</div>
+
 <!-- ══════════════ PAGES ══════════════ -->
 
 <!-- PAGE: MY OFFICE (Hub) -->
@@ -1113,6 +1119,9 @@ function officeEmails(office){
 // ══════════════════════════════════════════════════════════════
 let soOffice = null;
 let soName   = null;
+let _pageLoadVersion = null;   // _version token captured at load / reload — used to detect external changes
+let _pageLoadTime    = null;   // timestamp of last applyOwnerData() — used for stale-session warning
+let _savesBlocked    = false;  // true when an external change is detected; blocks all saves until reload
 let soEmail  = null;
 
 function sha256hex(str){ return str; } // simplified for file:// compatibility
@@ -1187,13 +1196,22 @@ function createOwnerData(){
   return { checkouts:[], checkins:[], stockEdits:{}, fieldEdits:{}, boardComments:{}, eventLog:[] };
 }
 function saveOwnerData(od){
+  od._savedAt  = new Date().toISOString();
+  od._savedBy  = soName || 'Unknown';
+  od._version  = genId();
   localStorage.setItem(LS_KEY, JSON.stringify(od));
   updateDataMgmtInfo();
 }
 function updateDataMgmtInfo(){
   const od = loadOwnerData();
-  const total = od.checkouts.length + od.checkins.length + Object.keys(od.stockEdits).length + Object.keys(od.fieldEdits).length;
-  document.getElementById('data-mgmt-info').textContent = total>0 ? `${total} local changes stored` : 'No local changes';
+  const total = (od.checkouts||[]).length + (od.checkins||[]).length
+              + Object.keys(od.stockEdits||{}).length + Object.keys(od.fieldEdits||{}).length;
+  let info = total>0 ? `${total} local changes stored` : 'No local changes';
+  if(od._savedBy && od._savedAt){
+    const d = new Date(od._savedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    info += `  ·  Last saved by ${od._savedBy} at ${d}`;
+  }
+  document.getElementById('data-mgmt-info').textContent = info;
 }
 
 function exportOwnerData(){
@@ -1255,6 +1273,9 @@ let _stockData, _fieldData, _retData, _actData;
 
 function applyOwnerData(){
   const od = loadOwnerData();  // Load FIRST — used throughout this function
+  _pageLoadVersion = od._version || null;   // capture version token for conflict detection
+  _pageLoadTime    = Date.now();            // reset stale-session clock
+  _savesBlocked    = false;                 // clear any prior block on fresh load
 
   _stockData = JSON.parse(JSON.stringify(STOCK));
   // Build base field data — skip manually removed rows
@@ -1695,6 +1716,7 @@ function toggleUnitEdit(key, cb){
 function cancelUnitEdit(){ _unitEditOpen=null; renderStock(); }
 
 function saveUnitEdit(si, ui){
+  if(_savesBlocked){ showToast('⚠ Cannot save — page is outdated. Click "Reload Now" in the banner first.', true); return; }
   const r  = _stockData[si];
   const u  = (r.units||[])[ui];
   if(!u) return;
@@ -1711,7 +1733,7 @@ function saveUnitEdit(si, ui){
   // Persist
   const od = loadOwnerData();
   if(!od.unitEdits) od.unitEdits={};
-  od.unitEdits[r.part+'_'+ui] = {serial:u.serial, location:u.location, owner:u.owner, available:u.available, notes:u.notes};
+  od.unitEdits[r.part+'__'+ui] = {serial:u.serial, location:u.location, owner:u.owner, available:u.available, notes:u.notes};
   od.eventLog.push({ts:tsNow(), type:'unit_edit', part:r.part, user:soName, notes:`Unit ${ui+1} updated`});
   saveOwnerData(od);
   _unitEditOpen=null;
@@ -2618,6 +2640,7 @@ let _coStockIdx=-1;
 let _checkoutUnitRef=null;
 
 function openCheckout(si, unit=null){
+  _checkoutUnitRef=null;  // BUG-3 fix: clear any stale unit ref from a previously cancelled unit-level checkout
   _coStockIdx=si;
   const r=_stockData[si];
   document.getElementById('co-part').textContent=r.part||'—';
@@ -2717,6 +2740,7 @@ AMD EMEA — ${d.soOffice}`;
 }
 
 function submitCheckout(){
+  if(_savesBlocked){ showToast('⚠ Cannot save — page is outdated. Click "Reload Now" in the banner first.', true); return; }
   const receiver=document.getElementById('co-receiver').value.trim();
   const company=document.getElementById('co-company').value.trim();
   const country=document.getElementById('co-country').value.trim();
@@ -2825,6 +2849,7 @@ function openCheckin(fi, syntheticRow=null){
 }
 
 function submitCheckin(){
+  if(_savesBlocked){ showToast('⚠ Cannot save — page is outdated. Click "Reload Now" in the banner first.', true); return; }
   const fi          = _ciFieldIdx;
   const r           = (fi>=0 && fi<_fieldData.length) ? _fieldData[fi] : _ciSyntheticRow;
   if(!r){ showToast('No board selected for check-in.', true); return; }
@@ -2910,6 +2935,7 @@ function submitCheckin(){
   od.eventLog.push({ts:tsNow(), type:'checkin', part:r.part, user:soName,
     notes:'Checked in — Kit: '+kitContents+' | HW: '+hwTests,
     _undo:{fieldRow:JSON.parse(JSON.stringify(r)), fieldIdx:fi,
+           checkinId:ci.id,
            unitRef:_ciUnitRef?{si:_ciUnitRef.si,ui:_ciUnitRef.ui}:null}});
   saveOwnerData(od);
 
@@ -3230,14 +3256,24 @@ function undoCheckin(logIndexFromEnd){
     od.stockEdits[entry.part]={...(od.stockEdits[entry.part]||{}),available:_stockData[si].available};
   }
 
-  // Remove last return record for this part (findLastIndex polyfill)
+  // Remove return record — match by checkinId if available (exact), else last-by-part (legacy fallback)
   var retIdx = -1;
-  for(var ri=_retData.length-1; ri>=0; ri--){ if(_retData[ri].part===entry.part){retIdx=ri;break;} }
+  if(snap.checkinId){
+    for(var ri=_retData.length-1; ri>=0; ri--){ if(_retData[ri]._checkinId===snap.checkinId){retIdx=ri;break;} }
+  }
+  if(retIdx<0){ // fallback for old log entries without checkinId
+    for(var ri=_retData.length-1; ri>=0; ri--){ if(_retData[ri].part===entry.part){retIdx=ri;break;} }
+  }
   if(retIdx>=0) _retData.splice(retIdx,1);
 
-  // Remove last checkin from od.checkins
+  // Remove checkin from od.checkins — match by checkinId if available, else last-by-part
   var ciIdx = -1;
-  for(var ci2=(od.checkins||[]).length-1; ci2>=0; ci2--){ if(od.checkins[ci2].part===entry.part){ciIdx=ci2;break;} }
+  if(snap.checkinId){
+    for(var ci2=(od.checkins||[]).length-1; ci2>=0; ci2--){ if(od.checkins[ci2].id===snap.checkinId){ciIdx=ci2;break;} }
+  }
+  if(ciIdx<0){ // fallback for old log entries without checkinId
+    for(var ci2=(od.checkins||[]).length-1; ci2>=0; ci2--){ if(od.checkins[ci2].part===entry.part){ciIdx=ci2;break;} }
+  }
   if(ciIdx>=0) od.checkins.splice(ciIdx,1);
 
   // Remove unitEdit for restored unit
@@ -3282,11 +3318,59 @@ function exportChangeLog(){
   showToast('Change log exported!');
 }
 
+// ══════════════════════════════════════════════════════════════
+// VERSION WATCHER — detects external changes & stale sessions
+// ══════════════════════════════════════════════════════════════
+const STALE_WARN_MS  = 60 * 60 * 1000;  // warn after 60 min open without reload
+const CHECK_INTERVAL =  2 * 60 * 1000;  // poll every 2 minutes
+
+function startVersionWatcher(){
+  setInterval(()=>{
+    checkForExternalChanges();
+    checkStaleSession();
+  }, CHECK_INTERVAL);
+}
+
+function checkForExternalChanges(){
+  if(_savesBlocked) return;  // already flagged — don't keep re-checking
+  try{
+    const stored = JSON.parse(localStorage.getItem(LS_KEY));
+    if(!stored || !stored._version) return;
+    if(_pageLoadVersion && stored._version !== _pageLoadVersion){
+      _savesBlocked = true;
+      const who  = stored._savedBy  || 'another session';
+      const when = stored._savedAt
+        ? ' at ' + new Date(stored._savedAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+        : '';
+      document.getElementById('conflict-banner-msg').textContent =
+        `⚠  Changes were saved by ${who}${when} while you had this page open. Reload before making further edits — your saves are blocked until you do.`;
+      document.getElementById('conflict-banner').style.display = 'flex';
+    }
+  } catch(e){}
+}
+
+function checkStaleSession(){
+  if(_savesBlocked) return;
+  if(_pageLoadTime && (Date.now() - _pageLoadTime) > STALE_WARN_MS){
+    showToast('⚠ This page has been open for over an hour. Consider reloading before making changes.', true);
+    _pageLoadTime = Date.now();  // reset so the toast fires at most once per hour
+  }
+}
+
+function reloadAndResume(){
+  document.getElementById('conflict-banner').style.display = 'none';
+  applyOwnerData();
+  renderAll();
+  updateDataMgmtInfo();
+  showToast('Data reloaded — you are now up to date.');
+}
+
 function initApp(){
   applyOwnerData();
   updateDataMgmtInfo();
   renderHub();
   renderInfo();
+  startVersionWatcher();
 }
 
 // Close modals on overlay click
