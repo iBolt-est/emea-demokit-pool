@@ -259,6 +259,13 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
 
 .unit-readonly td{opacity:.65;}
 .unit-readonly td:first-child{opacity:1;}
+
+/* Sortable column headers */
+th.sortable{cursor:pointer;user-select:none;position:relative;padding-right:20px!important;}
+th.sortable:hover{background:#243342;}
+th.sortable::after{content:'⇅';position:absolute;right:6px;opacity:.35;font-size:10px;}
+th.sort-asc::after{content:'▲';opacity:1;}
+th.sort-desc::after{content:'▼';opacity:1;}
 </style>
 </head>
 <body>
@@ -317,6 +324,7 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
   <button class="tab-btn" id="tab-activity" onclick="switchTab('activity')">📈 Board Activity</button>
   <button class="tab-btn" id="tab-notes" onclick="switchTab('notes')">💬 Notes &amp; Comments</button>
   <button class="tab-btn" id="tab-info" onclick="switchTab('info')">📋 Info &amp; How to Request</button>
+  <button class="tab-btn" id="tab-log" onclick="switchTab('log')">🕐 Change Log</button>
 </div>
 
 <!-- Data Management Bar -->
@@ -431,12 +439,12 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
     <table id="stock-table">
       <thead>
         <tr>
-          <th>Part #</th>
-          <th>Description</th>
-          <th style="text-align:center">Total</th>
-          <th>Available</th>
-          <th>Office</th>
-          <th>Location</th>
+          <th class="sortable" id="sth-part" onclick="setSortStock('part')">Part #</th>
+          <th class="sortable" id="sth-desc" onclick="setSortStock('description')">Description</th>
+          <th class="sortable" id="sth-total" onclick="setSortStock('total')" style="text-align:center">Total</th>
+          <th class="sortable" id="sth-avail" onclick="setSortStock('available')">Available</th>
+          <th class="sortable" id="sth-office" onclick="setSortStock('office')">Office</th>
+          <th class="sortable" id="sth-loc" onclick="setSortStock('location')">Location</th>
           <th>Serial/Box</th>
           <th>Notes</th>
           <th class="no-sort" colspan="2">Actions / Units</th>
@@ -476,16 +484,16 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
       <thead>
         <tr>
           <th class="edit-col-hdr">✏</th>
-          <th>Part #</th>
-          <th>Description</th>
-          <th>Office</th>
-          <th>Receiver</th>
-          <th>Company</th>
-          <th>Country</th>
-          <th>Shipped</th>
-          <th>Days Out</th>
-          <th>SA Number</th>
-          <th>Exp. Return</th>
+          <th class="sortable" id="fth-part" onclick="setSortField('part')">Part #</th>
+          <th class="sortable" id="fth-desc" onclick="setSortField('description')">Description</th>
+          <th class="sortable" id="fth-office" onclick="setSortField('office')">Office</th>
+          <th class="sortable" id="fth-receiver" onclick="setSortField('receiver')">Receiver</th>
+          <th class="sortable" id="fth-company" onclick="setSortField('company')">Company</th>
+          <th class="sortable" id="fth-country" onclick="setSortField('country')">Country</th>
+          <th class="sortable" id="fth-shipped" onclick="setSortField('shipped')">Shipped</th>
+          <th class="sortable" id="fth-days" onclick="setSortField('days')">Days Out</th>
+          <th class="sortable" id="fth-sa" onclick="setSortField('sa')">SA Number</th>
+          <th class="sortable" id="fth-ret" onclick="setSortField('expected_return')">Exp. Return</th>
           <th>Notes</th>
           <th class="no-sort">Action</th>
         </tr>
@@ -506,16 +514,16 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
       <thead>
         <tr>
           <th class="edit-col-hdr">✏</th>
-          <th>Part #</th>
-          <th>Description</th>
-          <th>Office</th>
-          <th>Receiver</th>
-          <th>Company</th>
-          <th>Country</th>
-          <th>Shipped</th>
-          <th>Returned</th>
-          <th>Condition</th>
-          <th>SA Number</th>
+          <th class="sortable" id="rth-part" onclick="setSortRet('part')">Part #</th>
+          <th class="sortable" id="rth-desc" onclick="setSortRet('description')">Description</th>
+          <th class="sortable" id="rth-off" onclick="setSortRet('office')">Office</th>
+          <th class="sortable" id="rth-recv" onclick="setSortRet('receiver')">Receiver</th>
+          <th class="sortable" id="rth-comp" onclick="setSortRet('company')">Company</th>
+          <th class="sortable" id="rth-ctr" onclick="setSortRet('country')">Country</th>
+          <th class="sortable" id="rth-ship" onclick="setSortRet('shipped')">Shipped</th>
+          <th class="sortable" id="rth-ret" onclick="setSortRet('returned')">Returned</th>
+          <th class="sortable" id="rth-cond" onclick="setSortRet('condition')">Condition</th>
+          <th class="sortable" id="rth-sa" onclick="setSortRet('sa')">SA Number</th>
           <th>Notes</th>
         </tr>
       </thead>
@@ -613,7 +621,7 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
         <div class="office-card">
           <div class="office-card-title"><span class="office-flag">&#127465;&#127466;</span> Munich Office</div>
           <div class="office-row"><div class="office-row-label">Stock Owner</div><div class="office-row-val">Peter Schillinger<br><a href="mailto:peter.schillinger@amd.com">peter.schillinger@amd.com</a></div></div>
-          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-row-val">Renata D'Ettore<br><a href="mailto:Renata.Dettore@amd.com">Renata.Dettore@amd.com</a></div></div>
+          <div class="office-row"><div class="office-row-label">Logistics</div><div class="office-r    attn:    "Renata Dettore", href="mailto:Renata.Dettore@amd.com">Renata.Dettore@amd.com</a></div></div>
           <div class="office-row"><div class="office-row-label">Address</div><div class="office-row-val">Willy-Brandt-Allee 4<br>81829, Munich, Germany</div></div>
         </div>
 
@@ -716,9 +724,13 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
           <div class="form-field"><label>SA Number</label><input type="text" id="co-sa" placeholder="SA-XXXXXXXX"></div>
           <div class="form-field"><label>Shipped Date</label><input type="date" id="co-ship-date"></div>
         </div>
-        <div class="form-grid" style="margin-top:12px;">
+        <div class="form-grid cols3" style="margin-top:12px;">
           <div class="form-field"><label>Expected Return Date</label><input type="date" id="co-ret-date"></div>
-          <div class="form-field"><label>Notes</label><input type="text" id="co-notes" placeholder="Any notes…"></div>
+          <div class="form-field"><label>FAE / Account Manager <span class="req">*</span></label><input type="text" id="co-fae-name" placeholder="FAE full name"></div>
+          <div class="form-field"><label>FAE Email <span class="req">*</span></label><input type="email" id="co-fae-email" placeholder="fae@amd.com"></div>
+        </div>
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="form-field" style="grid-column:span 2"><label>Notes</label><input type="text" id="co-notes" placeholder="Any notes…"></div>
         </div>
       </div>
     </div>
@@ -750,21 +762,33 @@ tr.expandable.expanded td:first-child{border-left:3px solid #2980b9;}
         <div class="form-grid" style="margin-top:12px;">
           <div class="form-field"><label>Original Receiver</label><div class="readonly-field" id="ci-receiver">—</div></div>
           <div class="form-field"><label>Company</label><div class="readonly-field" id="ci-company">—</div></div>
+          <div class="form-field"><label>FAE / Account Manager</label><div class="readonly-field" id="ci-fae">—</div></div>
         </div>
       </div>
       <div class="form-section">
         <div class="form-section-title">Return Details</div>
         <div class="form-grid cols3">
           <div class="form-field"><label>Return Date <span class="req">*</span></label><input type="date" id="ci-ret-date"></div>
-          <div class="form-field"><label>Condition</label>
-            <select id="ci-condition">
-              <option value="Good">Good</option>
-              <option value="Minor Wear">Minor Wear</option>
-              <option value="Damaged">Damaged</option>
-              <option value="Missing Parts">Missing Parts</option>
+          <div class="form-field"><label>Kit Contents <span class="req">*</span></label>
+            <select id="ci-kit-contents" style="color:#888;" onchange="this.style.color=this.value?'#1a252f':'#888'">
+              <option value="" disabled selected style="color:#aaa;">— select —</option>
+              <option value="Complete">Complete</option>
+              <option value="Missing Parts (see notes)">Missing Parts (see notes)</option>
+              <option value="Damaged (see notes)">Damaged (see notes)</option>
             </select>
           </div>
           <div class="form-field"><label>Returned By</label><input type="text" id="ci-returned-by" placeholder="Name of person returning"></div>
+        </div>
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="form-field"><label>Functional HW Tests <span class="req">*</span></label>
+            <select id="ci-hw-tests" style="color:#888;" onchange="this.style.color=this.value?'#1a252f':'#888'">
+              <option value="" disabled selected style="color:#aaa;">— select —</option>
+              <option value="Not tested">Not tested</option>
+              <option value="Basic HW bring-up - all tests pass">Basic HW bring-up — all tests pass</option>
+              <option value="Basic HW bring-up - not fully successful (see notes)">Basic HW bring-up — not fully successful (see notes)</option>
+              <option value="Other (see notes)">Other (see notes)</option>
+            </select>
+          </div>
         </div>
         <div class="form-field" style="margin-top:12px;">
           <label>Notes / Comments</label>
@@ -967,6 +991,90 @@ const OFFICE_EMAILS={
   'Paris Office':     'ludovic.aubel@amd.com',
 };
 // Get CC string for a given office: stock owner + logistics, deduped
+
+// Full return addresses per office (used in Request Return emails)
+const OFFICE_RETURN_ADDRESSES = {
+  'Dublin Warehouse': {
+    attn:    'Therese McDonagh',
+    company: 'AMD Ireland',
+    street:  '2020 Biaconi Avenue, CityWest Business Campus',
+    city:    'Saggart (Co Dublin)',
+    zip:     'D24 T683',
+    country: 'Ireland',
+    phone:   '+353 14032255',
+  },
+  'Milano Office': {
+    attn:    'Donato Giorgio',
+    company: 'AMD Italy',
+    street:  'Via Riccardo Lombardi No 19/16',
+    city:    'Milano',
+    zip:     '20153',
+    country: 'Italy',
+    phone:   '',
+  },
+  'BeNeLux Office': {
+    attn:    'Marijke Vandepitte',
+    company: 'AMD Belgium',
+    street:  'Villalaan 16',
+    city:    'Erembodegem (Aalst)',
+    zip:     '9320',
+    country: 'Belgium',
+    phone:   '+32 (53) 72 21 53',
+  },
+  'Sweden Office': {
+    attn:    'Anna Stalnacke',
+    company: 'AMD Sweden',
+    street:  'Knarrarnasgatan 15',
+    city:    'Kista',
+    zip:     '16440',
+    country: 'Sweden',
+    phone:   '',
+  },
+  'Kista Office': {
+    attn:    'Anna Stalnacke',
+    company: 'AMD Sweden',
+    street:  'Knarrarnasgatan 15',
+    city:    'Kista',
+    zip:     '16440',
+    country: 'Sweden',
+    phone:   '',
+  },
+  'Munich Office': {
+    attn:    'Renata Dettore',
+    company: 'AMD Germany',
+    street:  'Willy-Brandt-Allee 4',
+    city:    'Munich',
+    zip:     '81829',
+    country: 'Germany',
+    phone:   '',
+  },
+  'Paris Office': {
+    attn:    'Samreet Vuillot',
+    company: 'AMD France',
+    street:  'Bat D, 2 Rue René Caudron',
+    city:    'Voisins le Bretonneux',
+    zip:     '78960',
+    country: 'France',
+    phone:   '',
+  },
+};
+
+function officeReturnAddress(office){
+  const key = Object.keys(OFFICE_RETURN_ADDRESSES).find(k =>
+    office && (office === k || office.toLowerCase().includes(k.split(' ')[0].toLowerCase()))
+  );
+  if(!key) return 'AMD EMEA — ' + office;
+  const a = OFFICE_RETURN_ADDRESSES[key];
+  return [
+    'Att. ' + a.attn,
+    a.company,
+    a.street,
+    a.zip + ' ' + a.city,
+    a.country,
+    a.phone ? 'Tel: ' + a.phone : '',
+  ].filter(Boolean).join('\n  ');
+}
+
 function officeCc(office){
   const key = Object.keys(OFFICE_CONTACTS).find(k=>office&&(office===k||office.toLowerCase().includes(k.split(' ')[0].toLowerCase())));
   if(!key) return 'mark.van-der-bolt@amd.com';
@@ -1146,12 +1254,17 @@ function clearOwnerData(){
 let _stockData, _fieldData, _retData, _actData;
 
 function applyOwnerData(){
+  const od = loadOwnerData();  // Load FIRST — used throughout this function
+
   _stockData = JSON.parse(JSON.stringify(STOCK));
-  _fieldData = JSON.parse(JSON.stringify(IN_FIELD));
+  // Build base field data — skip manually removed rows
+  const removedKeys = new Set((od.removedFieldRows||[]).map(r=>r.key));
+  _fieldData = JSON.parse(JSON.stringify(IN_FIELD)).filter((r,origIdx)=>{
+    const rowKey = r.part+'__'+origIdx;
+    return !removedKeys.has(rowKey);
+  });
   _retData   = JSON.parse(JSON.stringify(RETURNED));
   _actData   = JSON.parse(JSON.stringify(ACTIVITY));
-
-  const od = loadOwnerData();
 
   // Apply stock edits
   for(const [key, edits] of Object.entries(od.stockEdits||{})){
@@ -1211,12 +1324,45 @@ function applyOwnerData(){
     }
   }
 
+  // Apply unit-level availability edits (from check-ins/checkouts)
+  for(const [key, edits] of Object.entries(od.unitEdits||{})){
+    // key is "partNumber__unitIndex"
+    const parts = key.split('__');
+    if(parts.length<2) continue;
+    const partName = parts[0];
+    const ui = parseInt(parts[1]);
+    const si = _stockData.findIndex(r=>r.part===partName);
+    if(si>=0 && (_stockData[si].units||[])[ui]){
+      Object.assign(_stockData[si].units[ui], edits);
+    }
+  }
+
+  // Archive check-ins of original IN_FIELD rows (no matching checkout)
+  for(const ci of (od.checkins||[])){
+    if(ci.checkoutId) continue; // handled by checkout replay above
+    if(_retData.some(r=>r._checkinId===ci.id)) continue; // already archived
+    const snap = ci._fieldSnapshot||{};
+    if(!snap.part) continue; // no snapshot, skip
+    _retData.push({
+      part:snap.part, serial:snap.serial||'', description:snap.description||'',
+      sa_number:snap.sa_number||'', qty:1,
+      shipped_date:snap.shipped_date||'', shipped_iso:snap.shipped_iso||'',
+      returned_date:ci.returned_date||'', returned_iso:ci.returned_iso||'',
+      receiver:snap.receiver||'', company:snap.company||'',
+      country:snap.country||'', office:snap.office||ci.soOffice||'',
+      condition:ci.kitContents||ci.condition||'',
+      hwTests:ci.hwTests||'', notes:ci.notes||'',
+      _checkinId:ci.id, _portalReturn:true,
+    });
+  }
+
   // Apply field edits
   for(const [idx, edits] of Object.entries(od.fieldEdits||{})){
     const i = parseInt(idx);
     if(_fieldData[i]) Object.assign(_fieldData[i], edits);
   }
 }
+
 
 // ══════════════════════════════════════════════════════════════
 // UTILITIES
@@ -1340,10 +1486,10 @@ function setHubFilter(filter){
 
 function renderHubTable(){
   if(_hubFilter==='total'||_hubFilter==='available'){
-    renderHubStockTable();
-  } else {
-    renderHubFieldTable();
-  }
+      renderHubStockTable();
+    } else {
+      renderHubFieldTable();
+    }
 }
 
 function renderHubFieldTable(){
@@ -1492,7 +1638,6 @@ function renderHub(){
   document.getElementById('hub-kpi-avail').textContent = myAvail;
   document.getElementById('hub-kpi-field').textContent = myFieldCount;
   document.getElementById('hub-kpi-overdue').textContent = overdue;
-  document.getElementById('hub-myfield-count').textContent = myFieldCount;
 
   // Update section title count chip
   setHubFilter(_hubFilter); // re-apply active filter (preserves user selection across re-renders)
@@ -1553,11 +1698,11 @@ function saveUnitEdit(si, ui){
   const r  = _stockData[si];
   const u  = (r.units||[])[ui];
   if(!u) return;
-  u.serial   = document.getElementById(`uie-serial-${si}-${ui}`).value;
-  u.location = document.getElementById(`uie-loc-${si}-${ui}`).value;
-  u.owner    = document.getElementById(`uie-owner-${si}-${ui}`).value;
-  u.available= document.getElementById(`uie-avail-${si}-${ui}`).value === 'true';
-  u.notes    = document.getElementById(`uie-notes-${si}-${ui}`).value;
+  u.serial   = document.getElementById('uie-serial-'+si+'-'+ui).value;
+  u.location = document.getElementById('uie-loc-'+si+'-'+ui).value;
+  u.owner    = document.getElementById('uie-owner-'+si+'-'+ui).value;
+  u.notes    = document.getElementById('uie-notes-'+si+'-'+ui).value;
+  // Status (available) is ONLY changed via Check-In / Checkout — never directly
 
   // Recalculate row-level totals from units
   const allUnits = r.units||[];
@@ -1581,6 +1726,7 @@ function toggleStockExpand(si){
 }
 
 function openCheckoutUnit(si, ui){
+  _checkoutUnitRef = {csi:si, cui:ui};
   // Open checkout modal pre-filled for a specific unit
   const r = _stockData[si];
   const u = (r.units||[])[ui];
@@ -1598,10 +1744,11 @@ function openCheckinUnit(si, ui){
       (u.loaned_to && f.receiver===u.loaned_to)
     )
   );
+  _ciUnitRef = {si, ui};
   if(fi>=0) openCheckin(fi);
   else {
     // create a synthetic checkin from unit data
-    openCheckin(-1, {part:r.part, description:r.description, serial:u.serial||'', receiver:u.loaned_to||'', customer:'', country:'', sa_number:'', _unitRef:{si,ui}});
+    openCheckin(-1, {part:r.part, description:r.description, serial:u.serial||'', receiver:u.loaned_to||'', customer:'', country:'', sa_number:'', loaned_to:u.loaned_to||'', _unitRef:{si,ui}});
   }
 }
 
@@ -1621,6 +1768,50 @@ function setStockKpi(filter){
     if(el) el.classList.toggle('kpi-active', mapKey===filter);
   });
   renderStock();
+}
+
+
+// ── Column sorting state ──────────────────────────────────────
+var _stockSort  = {col:null, dir:'asc'};
+var _fieldSort  = {col:null, dir:'asc'};
+var _retSort    = {col:null, dir:'asc'};
+
+function applySort(rows, sort, colMap){
+  if(!sort.col) return rows;
+  var key = colMap[sort.col];
+  if(!key) return rows;
+  var dir = sort.dir==='asc' ? 1 : -1;
+  return rows.slice().sort(function(a,b){
+    var av = key(a)||'', bv = key(b)||'';
+    // Numeric sort for numbers
+    if(typeof av==='number' && typeof bv==='number') return (av-bv)*dir;
+    // ISO date sort
+    var ad=Date.parse(av), bd=Date.parse(bv);
+    if(!isNaN(ad)&&!isNaN(bd)) return (ad-bd)*dir;
+    // String sort
+    return String(av).toLowerCase()<String(bv).toLowerCase()?-dir:String(av).toLowerCase()>String(bv).toLowerCase()?dir:0;
+  });
+}
+
+function setSortStock(col){
+  if(_stockSort.col===col) _stockSort.dir=_stockSort.dir==='asc'?'desc':'asc';
+  else { _stockSort.col=col; _stockSort.dir='asc'; }
+  renderStock();
+}
+function setSortField(col){
+  if(_fieldSort.col===col) _fieldSort.dir=_fieldSort.dir==='asc'?'desc':'asc';
+  else { _fieldSort.col=col; _fieldSort.dir='asc'; }
+  renderField();
+}
+function setSortRet(col){
+  if(_retSort.col===col) _retSort.dir=_retSort.dir==='asc'?'desc':'asc';
+  else { _retSort.col=col; _retSort.dir='asc'; }
+  renderReturned();
+}
+
+function sortClass(sort, col){
+  if(sort.col!==col) return 'sortable';
+  return 'sortable sort-'+(sort.dir==='asc'?'asc':'desc');
 }
 
 function renderStock(){
@@ -1707,10 +1898,23 @@ function renderStock(){
     return;
   }
 
+  rows = applySort(rows, _stockSort, {
+    part:        function(r){ return r.part||''; },
+    description: function(r){ return r.description||''; },
+    total:       function(r){ return r.total_qty||0; },
+    available:   function(r){ return r.available||0; },
+    office:      function(r){ return (r.offices||[r.office||''])[0]||''; },
+    location:    function(r){ return r.location||''; },
+  });
+  // Update sort indicator classes on stock headers
+  var sthMap = {part:'sth-part',description:'sth-desc',total:'sth-total',available:'sth-avail',office:'sth-office',location:'sth-loc'};
+  Object.keys(sthMap).forEach(function(k){
+    var el = document.getElementById(sthMap[k]);
+    if(el) el.className = sortClass(_stockSort, k);
+  });
   let html = '';
   rows.forEach((r,ri)=>{
     const si = _stockData.indexOf(r);
-    const isEdit = _stockEditOpen===si;
     const offices = r.offices||[];
     const officeHtml = offices.length>0 ? offices.map(o=>officeChip(o)).join(' ') : officeChip(r.office||'—');
     const avail = r.available||0;
@@ -1746,12 +1950,13 @@ function renderStock(){
 
     // Per-unit sub-rows when expanded
     if(isExpanded && units.length>0){
-      units.forEach((u, ui)=>{
+      (r.units||[]).forEach((u, ui)=>{
+        if(officeFilter && !officeMatch(u.office||'', officeFilter)) return; // skip other offices but keep original ui
         const unitKey = si+'_'+ui;
         const uAvail = u.available!==false;
         const statusBadge = uAvail
           ? '<span class="badge bs-stock">Available</span>'
-          : (u.loaned_to ? '<span class="badge" style="background:#fdebd0;color:#784212;">Out on Loan</span>' : '<span class="badge bs-oos">Checked Out</span>');
+          : '<span class="badge" style="background:#fdebd0;color:#784212;">On Loan</span>';
         const unitEditKey = si+'_'+ui;
         const isUnitEdit = _unitEditOpen === unitEditKey;
         var isOwnUnit = officeMatch(u.office||'', soOffice);
@@ -1761,8 +1966,7 @@ function renderStock(){
         var uActionCell = isOwnUnit
           ? (uAvail
               ? '<button class="checkout-btn" style="font-size:10px;padding:3px 8px;" onclick="openCheckoutUnit(' + si + ',' + ui + ')">Checkout</button>'
-              : '<button class="return-btn" style="font-size:10px;padding:3px 8px;margin-right:3px;" onclick="openCheckinUnit(' + si + ',' + ui + ')">Check-in</button>'
-                + '<button class="reserve-btn" style="font-size:10px;padding:3px 8px;" onclick="requestReturnUnit(' + si + ',' + ui + ')">&#128231; Request Return</button>')
+              : '<span style="font-size:11px;color:#888;font-style:italic;">Use edit ✏ to check in</span>')
           : '<span style="font-size:11px;color:#bbb;">View only</span>';
         const isSerialMatch = search && (u.serial||'').toLowerCase().includes(search);
         html += '<tr class="unit-sub-row' + (isOwnUnit?'':' unit-readonly') + (isSerialMatch?' unit-sub-row-match':'') + '">';
@@ -1778,21 +1982,74 @@ function renderStock(){
         html += '<td class="actions-cell" style="white-space:nowrap;">' + uActionCell + '</td>';
         html += '</tr>';
         if(isUnitEdit){
+          // Compute loan details HTML for checked-out units
+          var loanDetailsHtml = '';
+          if(!uAvail){
+            // Match strictly: same part + same office, by serial or loaned_to
+            // Never fall back to another office's data — show "Not available" instead
+            var unitOffice = u.office||'';
+            // Filter field rows to same part + same office
+            var officeFieldRows = _fieldData.filter(function(f){
+              var fieldOffice = f.office || ownerToOffice(f.owner||'') || f.owner || '';
+              var sameOffice = !unitOffice || officeMatch(fieldOffice, unitOffice);
+              return sameOffice && f.part===r.part;
+            });
+            // Match by serial or loaned_to if available
+            var loanRow = officeFieldRows.find(function(f){
+              return (u.serial && f.serial && u.serial===f.serial) ||
+                     (u.loaned_to && (f.receiver===u.loaned_to||f.company===u.loaned_to));
+            });
+            // If no identifier match: only use part+office match when exactly ONE record exists
+            // (avoids showing wrong customer data when multiple units are out to different people)
+            var multipleRecords = false;
+            if(!loanRow){
+              if(officeFieldRows.length===1){ loanRow = officeFieldRows[0]; }
+              else if(officeFieldRows.length>1){ multipleRecords = true; }
+            }
+            var loanRow2 = (unitOffice ? null : _fieldData.find(function(f){ return f.part===r.part; }));
+            // No cross-office fallback — only show data if we found a matching row
+            if(loanRow){
+              loanDetailsHtml = '<div style="margin-top:10px;padding:10px 12px;background:#fff8f0;border:1px solid #f0d9b5;border-radius:6px;border-left:4px solid #e67e22;">'
+                + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#e67e22;letter-spacing:.05em;margin-bottom:8px;">&#128203; Loan Details (read-only)</div>'
+                + '<div style="display:flex;flex-wrap:wrap;gap:8px 20px;">'
+                + '<div class="ie-field" style="min-width:130px;flex:1;"><label>Receiver</label><div style="padding:5px 8px;border:1px solid #f0d9b5;border-radius:4px;background:#fff;font-size:12px;">'+esc(loanRow.receiver||'—')+'</div></div>'
+                + '<div class="ie-field" style="min-width:130px;flex:1;"><label>Company / Customer</label><div style="padding:5px 8px;border:1px solid #f0d9b5;border-radius:4px;background:#fff;font-size:12px;">'+esc(loanRow.company||'—')+'</div></div>'
+                + '<div class="ie-field" style="min-width:90px;flex:1;"><label>Country</label><div style="padding:5px 8px;border:1px solid #f0d9b5;border-radius:4px;background:#fff;font-size:12px;">'+esc(loanRow.country||'—')+'</div></div>'
+                + '<div class="ie-field" style="min-width:100px;flex:1;"><label>Shipped Date</label><div style="padding:5px 8px;border:1px solid #f0d9b5;border-radius:4px;background:#fff;font-size:12px;">'+esc(loanRow.shipped_date||'—')+'</div></div>'
+                + '<div class="ie-field" style="min-width:110px;flex:1;"><label>SA Number</label><div style="padding:5px 8px;border:1px solid #f0d9b5;border-radius:4px;background:#fff;font-size:12px;">'+esc(loanRow.sa_number||'—')+'</div></div>'
+                + '</div></div>';
+            } else {
+              loanDetailsHtml = multipleRecords
+                ? '<div style="margin-top:8px;padding:8px 12px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:4px;font-size:12px;color:#555;"><strong>Multiple loan records</strong> exist for this board. Check the <em>In the Field</em> tab for individual receiver details.</div>'
+                : '<div style="margin-top:8px;padding:8px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:4px;font-size:12px;color:#888;font-style:italic;">&#128203; No loan details available — receiver info not recorded in source data.</div>';
+            }
+          }
           html += `<tr class="edit-row"><td colspan="9">
-            <div class="ie-wrap">
-              <div class="ie-field"><label>Serial / Box #</label><input type="text" id="uie-serial-${si}-${ui}" value="${esc(u.serial||'')}"></div>
-              <div class="ie-field"><label>Location</label><input type="text" id="uie-loc-${si}-${ui}" value="${esc(u.location||'')}"></div>
-              <div class="ie-field"><label>Owner / Contact</label><input type="text" id="uie-owner-${si}-${ui}" value="${esc(u.owner||'')}"></div>
-              <div class="ie-field"><label>Status</label>
-                <select id="uie-avail-${si}-${ui}" style="padding:6px 8px;border:1px solid #aac8e0;border-radius:4px;font-size:12px;">
-                  <option value="true" ${u.available?'selected':''}>Available</option>
-                  <option value="false" ${!u.available?'selected':''}>Checked Out / On Loan</option>
-                </select>
+            <!-- Edit fields (top) -->
+              <div class="ie-wrap" style="padding-bottom:10px;border-bottom:1px dashed #b8d4e8;">
+                <div class="ie-field"><label>Serial / Box #</label><input type="text" id="uie-serial-${si}-${ui}" value="${esc(u.serial||'')}"></div>
+                <div class="ie-field"><label>Location</label><input type="text" id="uie-loc-${si}-${ui}" value="${esc(u.location||'')}"></div>
+                <div class="ie-field"><label>Owner / Contact</label><input type="text" id="uie-owner-${si}-${ui}" value="${esc(u.owner||'')}"></div>
+                <div class="ie-field" style="flex:2;"><label>Notes</label><input type="text" id="uie-notes-${si}-${ui}" value="${esc(u.notes||'')}"></div>
+                <div class="ie-field" style="max-width:160px;flex:0;">
+                  <label>Current Status</label>
+                  <div style="padding:5px 8px;border:1px solid #aac8e0;border-radius:4px;background:#f0f7ff;font-size:12px;font-weight:700;color:${uAvail?'#1e6b1e':'#922b21'};">
+                    ${uAvail ? '● Available' : '● Checked Out'}
+                  </div>
+                </div>
               </div>
-              <div class="ie-field" style="flex:2;"><label>Notes</label><input type="text" id="uie-notes-${si}-${ui}" value="${esc(u.notes||'')}"></div>
-              <div class="ie-btns">
-                <button class="ie-save" onclick="saveUnitEdit(${si},${ui})">Save</button>
-                <button class="ie-cancel" onclick="cancelUnitEdit()">Cancel</button>
+              ${loanDetailsHtml}
+              <!-- Action bar (bottom) -->
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;">
+                <div style="display:flex;gap:6px;">
+                  <button class="ie-save" onclick="saveUnitEdit(${si},${ui})">Save changes</button>
+                  <button class="ie-cancel" onclick="cancelUnitEdit()">Cancel</button>
+                </div>
+                ${!uAvail ? '<div style="display:flex;align-items:center;gap:8px;">'
+                  + '<span style="font-size:11px;color:#888;">Board is checked out:</span>'
+                  + '<button class="checkin-btn" style="padding:5px 12px;font-size:11px;" onclick="cancelUnitEdit();openCheckinUnit('+si+','+ui+')">📥 Check-In Board</button>'
+                  + '<button class="reserve-btn" style="padding:5px 12px;font-size:11px;" onclick="requestReturnUnit('+si+','+ui+')">📧 Request Return</button>'
+                  + '</div>' : ''}
               </div>
             </div>
           </td></tr>`;
@@ -1800,23 +2057,6 @@ function renderStock(){
       });
     } else if(isExpanded && units.length===0){
       html += `<tr class="unit-sub-row"><td colspan="10" style="padding:10px 28px;font-size:12px;color:#aaa;">No unit data available for this board.</td></tr>`;
-    }
-
-    if(isEdit){
-      html += `<tr class="edit-row"><td colspan="9">
-        <div class="ie-wrap">
-          <div class="ie-field"><label>Total QTY</label><input type="number" id="sie-total" value="${esc(String(total))}" min="0"></div>
-          <div class="ie-field"><label>Available</label><input type="number" id="sie-avail" value="${esc(String(avail))}" min="0"></div>
-          <div class="ie-field"><label>Location</label><input type="text" id="sie-loc" value="${esc(r.location||'')}"></div>
-          <div class="ie-field"><label>Serial/Box</label><input type="text" id="sie-ser" value="${esc(r.serial||r.box||'')}"></div>
-          <div class="ie-field" style="flex:2;"><label>Notes</label><input type="text" id="sie-notes" value="${esc(r.notes||'')}"></div>
-          <div class="ie-btns">
-            <button class="ie-save" onclick="saveStockEdit(${si})">Save</button>
-            <button class="ie-cancel" onclick="cancelStockEdit()">Cancel</button>
-            <button class="ie-delete" onclick="deleteStockRow(${si})">Delete</button>
-          </div>
-        </div>
-      </td></tr>`;
     }
   });
   tbody.innerHTML = html;
@@ -1926,6 +2166,26 @@ function renderField(){
   }
 
   document.getElementById('f-count').textContent = `${rows.length} board${rows.length===1?'':'s'}`;
+  rows = applySort(rows, _fieldSort, {
+    part:            function(r){ return r.part||''; },
+    description:     function(r){ return r.description||''; },
+    office:          function(r){ return r.owner||r.office||''; },
+    receiver:        function(r){ return r.receiver||''; },
+    company:         function(r){ return r.company||''; },
+    country:         function(r){ return r.country||''; },
+    shipped:         function(r){ return r.shipped_iso||''; },
+    days:            function(r){ return daysAgo(r.shipped_iso)||0; },
+    sa:              function(r){ return r.sa_number||''; },
+    expected_return: function(r){ return r.expected_return||''; },
+  });
+  // Update sort indicators on field headers
+  ['part','desc','office','receiver','company','country','shipped','days','sa','ret'].forEach(function(k){
+    var el = document.getElementById('fth-'+k);
+    if(!el) return;
+    var colKey = {part:'part',desc:'description',office:'office',receiver:'receiver',company:'company',
+      country:'country',shipped:'shipped',days:'days',sa:'sa',ret:'expected_return'}[k];
+    el.className = sortClass(_fieldSort, colKey);
+  });
 
   const tbody = document.getElementById('field-tbody');
   if(rows.length===0){
@@ -1933,6 +2193,25 @@ function renderField(){
     return;
   }
 
+  rows = applySort(rows, _retSort, {
+    part:        function(r){ return r.part||''; },
+    description: function(r){ return r.description||''; },
+    office:      function(r){ return r.office||''; },
+    receiver:    function(r){ return r.receiver||''; },
+    company:     function(r){ return r.company||''; },
+    country:     function(r){ return r.country||''; },
+    shipped:     function(r){ return r.shipped_iso||''; },
+    returned:    function(r){ return r.returned_iso||r.returned_date||''; },
+    condition:   function(r){ return r.condition||''; },
+    sa:          function(r){ return r.sa_number||''; },
+  });
+  var rthMap={part:'rth-part',description:'rth-desc',office:'rth-off',receiver:'rth-recv',
+    company:'rth-comp',country:'rth-ctr',shipped:'rth-ship',returned:'rth-ret',
+    condition:'rth-cond',sa:'rth-sa'};
+  Object.keys(rthMap).forEach(function(k){
+    var el=document.getElementById(rthMap[k]);
+    if(el) el.className=sortClass(_retSort,k);
+  });
   let html='';
   rows.forEach(r=>{
     const fi = _fieldData.indexOf(r);
@@ -1945,6 +2224,7 @@ function renderField(){
     : '<span title="Read-only" style="color:#ccc;font-size:14px;">&#128274;</span>';
   var fActionCell = isOwnFieldRow
     ? '<button class="checkin-btn" onclick="openCheckin('+fi+')">Check-In</button>'
+      + ' <button onclick="removeFieldRow('+fi+')" title="Remove this entry" style="margin-left:4px;padding:3px 8px;font-size:11px;font-weight:700;border:1px solid #c0392b;border-radius:3px;background:#fff;color:#c0392b;cursor:pointer;">🗑</button>'
     : '<span style="font-size:11px;color:#bbb;">View only</span>';
   html += '<tr' + (days!==null&&days>90?' class="stale"':'') + '>';
   html += '<td class="edit-col">' + fEditCell + '</td>';
@@ -1991,6 +2271,50 @@ function toggleFieldEdit(fi,cb){
   if(cb.checked){_fieldEditOpen=fi;}else{_fieldEditOpen=-1;} renderField();
 }
 function cancelFieldEdit(){ _fieldEditOpen=-1; renderField(); }
+
+
+function removeFieldRow(fi){
+  const r = _fieldData[fi];
+  if(!r) return;
+  if(!confirm('Remove "'+r.part+'" ('+r.receiver+') from the In the Field list?\n\nThis will hide it from the field view. Use the Change Log to undo.')) return;
+
+  // Track removal so applyOwnerData doesn't re-add it
+  const od = loadOwnerData();
+  od.removedFieldRows = od.removedFieldRows||[];
+
+  // Find original IN_FIELD index if applicable
+  const originalIdx = IN_FIELD.findIndex(function(f,idx){
+    return f.part===r.part && (!r._checkoutId);
+  });
+  const rowKey = r.part+'__'+(originalIdx>=0?originalIdx:fi);
+  od.removedFieldRows.push({key:rowKey, part:r.part, ts:tsNow(), removedBy:soName});
+
+  // Also remove from od.checkouts if it was a checkout-originated row
+  if(r._checkoutId){
+    var ciIdx = -1;
+    for(var i=(od.checkouts||[]).length-1;i>=0;i--){
+      if(od.checkouts[i].id===r._checkoutId){ciIdx=i;break;}
+    }
+    // Mark as returned so it won't replay
+    if(ciIdx>=0){
+      od.checkins = od.checkins||[];
+      od.checkins.push({id:genId(), ts:tsNow(), checkoutId:r._checkoutId,
+        part:r.part, returned_date:'Removed', returned_iso:todayIso(),
+        kitContents:'Removed by Stock Owner', hwTests:'N/A',
+        soName:soName, soOffice:soOffice, notes:'Manually removed from field'});
+    }
+  }
+
+  od.eventLog.push({ts:tsNow(), type:'field_remove', part:r.part, user:soName,
+    notes:'Manually removed field entry: '+r.part+' / '+r.receiver});
+  saveOwnerData(od);
+
+  // Remove from in-memory _fieldData
+  _fieldData.splice(fi, 1);
+
+  renderHub(); renderStock(); renderField(); renderChangeLog();
+  showToast('Field entry removed. Use Change Log to review.');
+}
 
 function saveFieldEdit(fi){
   const r=_fieldData[fi];
@@ -2066,7 +2390,7 @@ function renderReturned(){
           <div class="ie-field"><label>Return Date</label><input type="text" id="rie-ret" value="${esc(r.returned_date||'')}"></div>
           <div class="ie-field"><label>Condition</label>
             <select id="rie-cond">
-              ${['Good','Minor Wear','Damaged','Missing Parts'].map(c=>`<option ${r.condition===c?'selected':''}>${c}</option>`).join('')}
+              ${['Complete','Missing Parts (see notes)','Damaged (see notes)'].map(c=>'<option '+(r.condition===c?'selected':'')+'>'+c+'</option>').join('')}
             </select>
           </div>
           <div class="ie-field" style="flex:2"><label>Notes</label><input type="text" id="rie-notes" value="${esc(r.notes||'')}"></div>
@@ -2108,7 +2432,33 @@ function saveRetEdit(ri){
 // ══════════════════════════════════════════════════════════════
 function renderActivity(){
   const search=(document.getElementById('a-search').value||'').toLowerCase();
-  let rows=_actData.filter(r=>{
+  // Merge portal checkouts/check-ins into activity counts
+  const od2 = loadOwnerData();
+  const portalMap = {};
+  for(const co of (od2.checkouts||[])){
+    if(!portalMap[co.part]) portalMap[co.part]={s:0,r:0};
+    portalMap[co.part].s++;
+  }
+  for(const ci of (od2.checkins||[])){
+    if(!portalMap[ci.part]) portalMap[ci.part]={s:0,r:0};
+    portalMap[ci.part].r++;
+  }
+  const mergedAct = _actData.map(function(row){
+    const pc = portalMap[row.part]||{s:0,r:0};
+    return Object.assign({}, row, {
+      shipped_count:(row.shipped_count||0)+pc.s,
+      returned_count:(row.returned_count||0)+pc.r,
+    });
+  });
+  Object.keys(portalMap).forEach(function(part){
+    if(!mergedAct.some(function(r){return r.part===part;})){
+      const desc = (_stockData.find(function(s){return s.part===part;})||{}).description||'';
+      mergedAct.push({part:part, description:desc,
+        shipped_count:portalMap[part].s, returned_count:portalMap[part].r,
+        countries_count:0, countries_list:''});
+    }
+  });
+  let rows=mergedAct.filter(r=>{
     if(!search) return true;
     return (r.part||'').toLowerCase().includes(search)||
            (r.description||'').toLowerCase().includes(search);
@@ -2265,6 +2615,7 @@ function clearRequests(){
 // CHECKOUT MODAL
 // ══════════════════════════════════════════════════════════════
 let _coStockIdx=-1;
+let _checkoutUnitRef=null;
 
 function openCheckout(si, unit=null){
   _coStockIdx=si;
@@ -2280,6 +2631,8 @@ function openCheckout(si, unit=null){
   document.getElementById('co-sa').value='';
   document.getElementById('co-ship-date').value=todayIso();
   document.getElementById('co-ret-date').value='';
+  document.getElementById('co-fae-name').value='';
+  document.getElementById('co-fae-email').value='';
   document.getElementById('co-notes').value='';
   openModal('co-modal');
 }
@@ -2346,8 +2699,9 @@ Loan Information:
   Country:            ${d.country||'—'}
 
 Return Address:
-  AMD EMEA — ${d.soOffice}
-  Contact: ${d.soName}
+  ${officeReturnAddress(d.soOffice)}
+
+  Stock Owner Contact: ${d.soName}
 
 Please ensure the board is returned in its original packaging with all accessories included.
 Once shipped, please share the tracking number with your Stock Owner so we can confirm receipt.
@@ -2366,9 +2720,15 @@ function submitCheckout(){
   const receiver=document.getElementById('co-receiver').value.trim();
   const company=document.getElementById('co-company').value.trim();
   const country=document.getElementById('co-country').value.trim();
+  const faeName=document.getElementById('co-fae-name').value.trim();
+  const faeEmail=document.getElementById('co-fae-email').value.trim();
   if(!receiver||!company||!country){showToast('Receiver, Company and Country are required.',true);return;}
+  if(!faeName||!faeEmail){showToast('FAE name and email are required.',true);return;}
 
   const r=_stockData[_coStockIdx];
+  // Warn if this board is already in the field
+  const alreadyInField = _fieldData.some(f=>f.part===r.part);
+  if(alreadyInField && !confirm('⚠ This board ('+r.part+') already has an entry in the Field. Add another checkout entry anyway?\n\nCancel to avoid a duplicate.')) return;
   const shipDateVal=document.getElementById('co-ship-date').value;
   const shipDate=shipDateVal?new Date(shipDateVal).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 
@@ -2382,6 +2742,8 @@ function submitCheckout(){
     company:    company,
     country:    country,
     email:      document.getElementById('co-email').value.trim(),
+    faeName:    faeName,
+    faeEmail:   faeEmail,
     sa_number:  document.getElementById('co-sa').value.trim(),
     shipped_date: shipDate,
     shipped_iso:  shipDateVal||todayIso(),
@@ -2394,11 +2756,22 @@ function submitCheckout(){
 
   // Update stock
   if(r.available>0) r.available--;
+  // If we know which unit was checked out, mark it unavailable
+  if(_checkoutUnitRef){
+    const {csi, cui} = _checkoutUnitRef;
+    if(_stockData[csi] && (_stockData[csi].units||[])[cui]){
+      _stockData[csi].units[cui].available = false;
+      _stockData[csi].units[cui].loaned_to = document.getElementById('co-receiver')?.value||'';
+    }
+  }
   const si=_stockData.indexOf(r);
   const od=loadOwnerData();
   od.checkouts.push(co);
   od.stockEdits[r.part]={...(od.stockEdits[r.part]||{}), available:r.available};
-  od.eventLog.push({ts:tsNow(),type:'checkout',part:r.part,user:soName,notes:`Checked out to ${receiver} (${company})`});
+  od.eventLog.push({ts:tsNow(), type:'checkout', part:r.part, user:soName,
+    notes:'Checked out to '+receiver+' ('+company+')',
+    _undo:{checkoutId:co.id, part:r.part, stockIdx:_coStockIdx,
+           unitRef:_checkoutUnitRef?{si:_checkoutUnitRef.csi,ui:_checkoutUnitRef.cui}:null}});
   saveOwnerData(od);
 
   // Add to field data live
@@ -2407,98 +2780,159 @@ function submitCheckout(){
     owner:co.office||soOffice, qty:1,
     sa_number:co.sa_number, shipped_date:co.shipped_date, shipped_iso:co.shipped_iso,
     receiver:co.receiver, company:co.company, country:co.country,
-    email:co.email, expected_return:co.expected_return, notes:co.notes,
+    email:co.email, faeName:co.faeName, faeEmail:co.faeEmail, expected_return:co.expected_return, notes:co.notes,
     office:co.office||soOffice, _checkoutId:co.id,
   });
 
-  generateCheckoutEmail(co, r);
   closeModal('co-modal');
   renderHub();
   renderStock();
   renderField();
-  showToast('Checkout recorded! Email file generated.');
+  showToast('Checkout recorded!');
+  try {
+    generateCheckoutEmail(co, r);
+  } catch(emailErr) {
+    showToast('Email error: ' + emailErr.message, true);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
 // CHECK-IN MODAL
 // ══════════════════════════════════════════════════════════════
 let _ciFieldIdx=-1;
+let _ciSyntheticRow=null;
+let _ciUnitRef=null;
 
 function openCheckin(fi, syntheticRow=null){
   _ciFieldIdx=fi;
+  _ciSyntheticRow=syntheticRow||null;
   const r = (fi>=0 && fi<_fieldData.length) ? _fieldData[fi] : (syntheticRow||{});
   document.getElementById('ci-part').textContent=r.part||'—';
   document.getElementById('ci-desc').textContent=r.description||'—';
   document.getElementById('ci-sa').textContent=r.sa_number||'—';
   document.getElementById('ci-receiver').textContent=r.receiver||'—';
   document.getElementById('ci-company').textContent=r.company||'—';
+  document.getElementById('ci-fae').textContent=(r.faeName||'—')+(r.faeEmail?' ('+r.faeEmail+')':'');
   document.getElementById('ci-modal-chip').textContent=`${r.part} — ${r.description}`;
-  document.getElementById('ci-ret-date').value=todayIso();
-  document.getElementById('ci-condition').value='Good';
+  document.getElementById('ci-ret-date').value='';
+  document.getElementById('ci-kit-contents').value='';
+  document.getElementById('ci-kit-contents').style.color='#888';
+  document.getElementById('ci-hw-tests').value='';
+  document.getElementById('ci-hw-tests').style.color='#888';
   document.getElementById('ci-returned-by').value='';
   document.getElementById('ci-notes').value='';
   openModal('ci-modal');
 }
 
 function submitCheckin(){
-  const fi=_ciFieldIdx;
-  const r=_fieldData[fi];
-  const retDate=document.getElementById('ci-ret-date').value;
-  const condition=document.getElementById('ci-condition').value;
-  const retBy=document.getElementById('ci-returned-by').value.trim();
-  const notes=document.getElementById('ci-notes').value.trim();
+  const fi          = _ciFieldIdx;
+  const r           = (fi>=0 && fi<_fieldData.length) ? _fieldData[fi] : _ciSyntheticRow;
+  if(!r){ showToast('No board selected for check-in.', true); return; }
 
-  const ci={
-    id:          genId(),
-    ts:          tsNow(),
-    checkoutId:  r._checkoutId||null,
-    part:        r.part,
-    description: r.description,
-    returned_date: retDate?new Date(retDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-    returned_iso: retDate||todayIso(),
-    condition:   condition,
-    returned_by: retBy,
-    notes:       notes,
-    soName:      soName,
-    soOffice:    soOffice,
+  const retDate     = document.getElementById('ci-ret-date').value;
+  const kitContents = document.getElementById('ci-kit-contents').value;
+  const hwTests     = document.getElementById('ci-hw-tests').value;
+  if(!retDate){      showToast('Please enter a return date.', true); return; }
+  if(!kitContents){  showToast('Please select Kit Contents before confirming.', true); return; }
+  if(!hwTests){      showToast('Please select Functional HW Tests result before confirming.', true); return; }
+
+  const faeName  = r.faeName||'';
+  const faeEmail = r.faeEmail||'';
+  const retBy    = document.getElementById('ci-returned-by').value.trim();
+  const notes    = document.getElementById('ci-notes').value.trim();
+
+  const retDateDisplay = retDate
+    ? new Date(retDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})
+    : new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+  const ci = {
+    id:           genId(),   ts: tsNow(),
+    checkoutId:   r._checkoutId||null,
+    part:         r.part,    description: r.description,
+    returned_date:retDateDisplay,  returned_iso: retDate||todayIso(),
+    kitContents:  kitContents,     hwTests:      hwTests,
+    condition:    kitContents,     returned_by:  retBy,
+    notes:        notes,           faeName:      faeName,
+    faeEmail:     faeEmail,        soName:       soName,
+    soOffice:     soOffice,
   };
 
-  // Add to returned
+  // ── 1: Update _stockData units in memory ──────────────────
+  const stockSi = _stockData.findIndex(s=>s.part===r.part);
+  let   matchedUi = -1;
+  if(stockSi>=0){
+    const units = _stockData[stockSi].units||[];
+    // Priority: serial → loaned_to/receiver → _ciUnitRef → first unavailable
+    matchedUi = units.findIndex(u=>!u.available && u.serial && r.serial && u.serial===r.serial);
+    if(matchedUi<0) matchedUi = units.findIndex(u=>!u.available && u.loaned_to &&
+      (u.loaned_to===r.receiver || u.loaned_to===r.loaned_to));
+    if(matchedUi<0 && _ciUnitRef!==null) matchedUi = _ciUnitRef.ui;
+    if(matchedUi<0) matchedUi = units.findIndex(u=>u.available===false || u.available===undefined);
+    if(matchedUi>=0){
+      units[matchedUi].available = true;
+      units[matchedUi].loaned_to = '';
+    }
+    _stockData[stockSi].available = Math.max(0,(_stockData[stockSi].available||0)+1);
+  }
+
+  // ── 2: Update _fieldData (remove checked-in row) ─────────
+  if(fi>=0 && fi<_fieldData.length) _fieldData.splice(fi,1);
+
+  // ── 3: Add to _retData ────────────────────────────────────
   _retData.push({
     part:r.part, serial:r.serial||'', description:r.description,
     sa_number:r.sa_number||'', qty:1,
     shipped_date:r.shipped_date||'', shipped_iso:r.shipped_iso||'',
-    returned_date:ci.returned_date, receiver:r.receiver||'',
+    returned_date:ci.returned_date,   receiver:r.receiver||'',
     company:r.company||'', country:r.country||'',
-    office:r.office||r.owner||'', condition:condition, notes:notes,
+    office:r.office||r.owner||soOffice,
+    condition:kitContents, hwTests:hwTests, notes:notes,
     _checkinId:ci.id,
   });
 
-  // Remove from field
-  _fieldData.splice(fi,1);
-
-  // Update stock availability
-  const si=_stockData.findIndex(s=>s.part===r.part);
-  if(si>=0){
-    _stockData[si].available=(_stockData[si].available||0)+1;
-    const od2=loadOwnerData();
-    od2.stockEdits[r.part]={...(od2.stockEdits[r.part]||{}),available:_stockData[si].available};
-    saveOwnerData(od2);
-  }
-
-  const od=loadOwnerData();
+  // ── 4: Save to localStorage ───────────────────────────────
+  const od = loadOwnerData();
+  od.unitEdits  = od.unitEdits||{};
+  od.stockEdits = od.stockEdits||{};
+  if(stockSi>=0 && matchedUi>=0)
+    od.unitEdits[r.part+'__'+matchedUi] = {available:true, loaned_to:''};
+  if(stockSi>=0)
+    od.stockEdits[r.part] = {...(od.stockEdits[r.part]||{}), available:_stockData[stockSi].available};
+  od.checkins = od.checkins||[];
+  ci._fieldSnapshot = {
+    part:r.part, serial:r.serial||'', description:r.description,
+    receiver:r.receiver||'', company:r.company||'', country:r.country||'',
+    sa_number:r.sa_number||'', shipped_date:r.shipped_date||'',
+    shipped_iso:r.shipped_iso||'', office:r.office||r.owner||soOffice,
+  };
   od.checkins.push(ci);
-  od.eventLog.push({ts:tsNow(),type:'checkin',part:r.part,user:soName,notes:`Checked in — Condition: ${condition}`});
+  od.eventLog = od.eventLog||[];
+  od.eventLog.push({ts:tsNow(), type:'checkin', part:r.part, user:soName,
+    notes:'Checked in — Kit: '+kitContents+' | HW: '+hwTests,
+    _undo:{fieldRow:JSON.parse(JSON.stringify(r)), fieldIdx:fi,
+           unitRef:_ciUnitRef?{si:_ciUnitRef.si,ui:_ciUnitRef.ui}:null}});
   saveOwnerData(od);
 
-  generateCheckinEmail(ci, r);
+  _ciUnitRef = null;
+
+  // ── 5: Render then email ──────────────────────────────────
   closeModal('ci-modal');
+  if(stockSi>=0) _stockExpanded.add(stockSi);
   renderHub();
   renderStock();
   renderField();
   renderReturned();
-  showToast('Check-in recorded! Email file generated.');
+  renderChangeLog();
+  showToast('Check-in recorded!');
+  // Generate email separately with explicit error feedback
+  try {
+    generateCheckinEmail(ci, r);
+  } catch(emailErr) {
+    showToast('Email error: ' + emailErr.message, true);
+    console.error('Email generation failed:', emailErr);
+  }
 }
+
 
 // ══════════════════════════════════════════════════════════════
 // ADD BOARD MODAL
@@ -2581,14 +3015,16 @@ AMD EMEA — ${co.soOffice}`;
 }
 
 function generateCheckinEmail(ci, fieldRow){
-  // Check-in confirmation: TO = receiver, CC = stock owner + logistics of the board's home office only
-  const toEmail  = fieldRow.email || '';
+  // Check-in confirmation: TO = receiver, CC = FAE + stock owner + logistics
+  // Internal only: TO = FAE, CC = stock owner + logistics (no customer)
+  const faeAddr  = ci.faeEmail || fieldRow.faeEmail || '';
+  const toEmail  = faeAddr || officeCc(ci.soOffice || soOffice).split(',')[0].trim();
   const ccEmail  = officeCc(ci.soOffice || soOffice);
-  const subject  = `AMD EMEA Board Loan — ${fieldRow.part} received back — ${ci.condition}`;
+  const subject  = `AMD EMEA Board Return Logged — ${fieldRow.part} | ${ci.kitContents||ci.condition||''}${ci.hwTests?' | '+ci.hwTests:''}`;  
   const body =
-`Dear ${fieldRow.receiver||'Team'},
+`Hi ${ci.faeName||'Team'},
 
-Thank you for returning the evaluation board. We have received it and logged the return.
+The board listed below has been returned and the check-in has been logged in the EMEA Board Loaner Pool.
 
 Board Details:
   Part Number:  ${fieldRow.part}
@@ -2598,12 +3034,14 @@ Board Details:
 
 Return Details:
   Return Date:  ${ci.returned_date}
-  Condition:    ${ci.condition}
-  Returned By:  ${ci.returned_by||'—'}
-  Notes:        ${ci.notes||'None'}
+  Kit Contents:        ${ci.kitContents||ci.condition||'—'}
+  Functional HW Tests: ${ci.hwTests||'Not tested'}
+  FAE / Acct Manager:  ${ci.faeName||fieldRow.faeName||'—'}
+  Returned By:         ${ci.returned_by||'—'}
+  Notes:               ${ci.notes||'None'}
 
-The board has been returned to AMD EMEA — ${ci.soOffice}.
-Please do not hesitate to contact us if you need further evaluation hardware in the future.
+Check-in logged by: ${ci.soName} — AMD EMEA ${ci.soOffice}
+This is an internal notification only.
 
 Best regards,
 ${ci.soName}
@@ -2613,17 +3051,237 @@ AMD EMEA — ${ci.soOffice}`;
 }
 
 function downloadEml(to, cc, subject, body, filename){
-  const eml=`To: ${to}\nCC: ${cc}\nSubject: ${subject}\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\n${body}`;
-  const blob=new Blob([eml],{type:'message/rfc822'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`${filename}.eml`;
-  a.click();
+  try {
+    const mailtoUrl = 'mailto:' + encodeURIComponent(to)
+      + '?cc='      + encodeURIComponent(cc)
+      + '&subject=' + encodeURIComponent(subject)
+      + '&body='    + encodeURIComponent(body);
+
+    if(mailtoUrl.length <= 1800){
+      // Open in Outlook directly via anchor click (same approach original dashboard used)
+      const a = document.createElement('a');
+      a.href = mailtoUrl;
+      a.rel  = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      // Long email — .eml file download
+      const eml = 'To: ' + to + '\nCC: ' + cc + '\nSubject: ' + subject
+        + '\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\n' + body;
+      const blob = new Blob([eml], {type:'message/rfc822'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = (filename||'email').replace(/[^a-zA-Z0-9._-]/g,'_') + '.eml';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  } catch(err) {
+    showToast('Email error: ' + err.message, true);
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════
+// CHANGE LOG TAB
+// ══════════════════════════════════════════════════════════════
+const LOG_LABELS = {
+  checkout:   {label:'Checkout',    color:'#27ae60'},
+  checkin:    {label:'Check-In',    color:'#2980b9'},
+  unit_edit:  {label:'Unit Edit',   color:'#7c3aed'},
+  stock_edit: {label:'Stock Edit',  color:'#e67e22'},
+  field_edit: {label:'Field Edit',  color:'#e67e22'},
+  ret_edit:   {label:'Return Edit', color:'#e67e22'},
+  add_board:  {label:'Add Board',   color:'#16a085'},
+  delete:     {label:'Delete',      color:'#c0392b'},
+};
+
+function renderChangeLog(){
+  const search = (document.getElementById('log-search').value||'').toLowerCase();
+  const typeFilter = document.getElementById('log-type').value;
+  const od = loadOwnerData();
+  const log = (od.eventLog||[]).slice().reverse(); // newest first
+
+  const rows = log.filter(e=>{
+    if(typeFilter && e.type !== typeFilter) return false;
+    if(search) return (e.part||'').toLowerCase().includes(search) ||
+                      (e.user||'').toLowerCase().includes(search) ||
+                      (e.notes||'').toLowerCase().includes(search);
+    return true;
+  });
+
+  document.getElementById('log-count').textContent = rows.length + ' event' + (rows.length===1?'':'s');
+  const tbody = document.getElementById('log-tbody');
+  if(rows.length===0){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#aaa;font-size:14px;">No changes recorded yet.<br><span style="font-size:12px;">Actions like checkout, check-in, and edits will appear here.</span></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((e, i)=>{
+    const meta = LOG_LABELS[e.type]||{label:e.type||'—', color:'#888'};
+    const badge = '<span style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;background:'+meta.color+'22;color:'+meta.color+';">'+meta.label+'</span>';
+    const bg = i%2===0?'#fff':'#fafbfc';
+    var undoBtn = ((e.type==='checkin'||e.type==='checkout') && e._undo && !e._undone)
+      ? '<button onclick="'+(e.type==='checkout'?'undoCheckout':'undoCheckin')+'('+log.indexOf(e)+')" style="margin-left:8px;padding:2px 8px;font-size:10px;font-weight:700;border:1px solid #c0392b;border-radius:3px;background:#fff;color:#c0392b;cursor:pointer;">↩ Undo</button>'
+      : '';
+    return '<tr style="background:'+bg+';">'
+      + '<td style="padding:9px 14px;font-size:12px;color:#555;white-space:nowrap;border-bottom:1px solid #f0f0f0;">' + esc(e.ts||'—') + '</td>'
+      + '<td style="padding:9px 14px;border-bottom:1px solid #f0f0f0;">' + badge + undoBtn + '</td>'
+      + '<td style="padding:9px 14px;font-size:12px;font-weight:700;color:#1a252f;border-bottom:1px solid #f0f0f0;">' + esc(e.part||'—') + '</td>'
+      + '<td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #f0f0f0;">' + esc(e.user||'—') + '</td>'
+      + '<td style="padding:9px 14px;font-size:12px;color:#555;border-bottom:1px solid #f0f0f0;">' + esc(e.notes||'') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+
+
+function undoCheckout(logIndexFromEnd){
+  if(!confirm('Undo this checkout? This will remove the board from In the Field and mark it as Available again.')) return;
+  const od = loadOwnerData();
+  const log = od.eventLog||[];
+  const actualIdx = log.length - 1 - logIndexFromEnd;
+  const entry = log[actualIdx];
+  if(!entry || !entry._undo){ showToast('Cannot undo — snapshot not found.', true); return; }
+
+  const snap = entry._undo;
+
+  // Remove from _fieldData (match by checkoutId or part+receiver)
+  var fiIdx = _fieldData.findIndex(function(f){ return f._checkoutId===snap.checkoutId; });
+  if(fiIdx<0) fiIdx = _fieldData.findIndex(function(f){ return f.part===snap.part; });
+  if(fiIdx>=0) _fieldData.splice(fiIdx, 1);
+
+  // Mark unit as available again
+  var undoStockSi = snap.stockIdx>=0 ? snap.stockIdx : _stockData.findIndex(function(s){ return s.part===snap.part; });
+  if(snap.unitRef){
+    var uSi = snap.unitRef.si, uUi = snap.unitRef.ui;
+    if(_stockData[uSi] && (_stockData[uSi].units||[])[uUi]){
+      _stockData[uSi].units[uUi].available = true;
+      _stockData[uSi].units[uUi].loaned_to = '';
+      od.unitEdits = od.unitEdits||{};
+      od.unitEdits[snap.part+'__'+uUi] = {available:true, loaned_to:''};
+    }
+  }
+
+  // Update stock available count
+  if(undoStockSi>=0){
+    _stockData[undoStockSi].available = Math.min(
+      _stockData[undoStockSi].total_qty||999,
+      (_stockData[undoStockSi].available||0)+1
+    );
+    od.stockEdits = od.stockEdits||{};
+    od.stockEdits[snap.part] = {...(od.stockEdits[snap.part]||{}), available:_stockData[undoStockSi].available};
+  }
+
+  // Remove checkout from od.checkouts
+  var coIdx = -1;
+  for(var i=(od.checkouts||[]).length-1; i>=0; i--){
+    if(od.checkouts[i].id===snap.checkoutId){ coIdx=i; break; }
+  }
+  if(coIdx>=0) od.checkouts.splice(coIdx, 1);
+
+  // Mark log entry as undone
+  log[actualIdx]._undone = true;
+  log[actualIdx].notes += ' [UNDONE]';
+  od.eventLog.push({ts:tsNow(), type:'undo', part:snap.part, user:soName,
+    notes:'Undid checkout of '+snap.part});
+  saveOwnerData(od);
+
+  if(undoStockSi>=0) _stockExpanded.add(undoStockSi);
+  renderHub(); renderStock(); renderField(); renderReturned(); renderChangeLog();
+  showToast('Checkout undone — board marked Available again.');
+}
+
+function undoCheckin(logIndexFromEnd){
+  if(!confirm('Undo this check-in? This will restore the board to In the Field and mark it as Checked Out again.')) return;
+  const od = loadOwnerData();
+  const log = od.eventLog||[];
+  // logIndexFromEnd is index in the REVERSED array shown in UI
+  const actualIdx = log.length - 1 - logIndexFromEnd;
+  const entry = log[actualIdx];
+  if(!entry || !entry._undo) { showToast('Cannot undo — snapshot not found.', true); return; }
+
+  const snap = entry._undo;
+
+  // Restore field row
+  if(snap.fieldRow){
+    _fieldData.push(snap.fieldRow);
+    if(od.fieldEdits) delete od.fieldEdits[String(snap.fieldIdx)];
+  }
+
+  // Restore unit available=false
+  if(snap.unitRef){
+    const {si, ui} = snap.unitRef;
+    if(_stockData[si] && (_stockData[si].units||[])[ui]){
+      _stockData[si].units[ui].available = false;
+      _stockData[si].units[ui].loaned_to = snap.fieldRow.receiver||'';
+    }
+  }
+
+  // Decrement stock available count
+  const si = _stockData.findIndex(s=>s.part===entry.part);
+  if(si>=0 && _stockData[si].available>0){
+    _stockData[si].available--;
+    od.stockEdits[entry.part]={...(od.stockEdits[entry.part]||{}),available:_stockData[si].available};
+  }
+
+  // Remove last return record for this part (findLastIndex polyfill)
+  var retIdx = -1;
+  for(var ri=_retData.length-1; ri>=0; ri--){ if(_retData[ri].part===entry.part){retIdx=ri;break;} }
+  if(retIdx>=0) _retData.splice(retIdx,1);
+
+  // Remove last checkin from od.checkins
+  var ciIdx = -1;
+  for(var ci2=(od.checkins||[]).length-1; ci2>=0; ci2--){ if(od.checkins[ci2].part===entry.part){ciIdx=ci2;break;} }
+  if(ciIdx>=0) od.checkins.splice(ciIdx,1);
+
+  // Remove unitEdit for restored unit
+  if(snap.unitRef && od.unitEdits){
+    delete od.unitEdits[entry.part+'__'+snap.unitRef.ui];
+  }
+  // Recalculate available count from units
+  const undoStockSi = _stockData.findIndex(s=>s.part===entry.part);
+  if(undoStockSi>=0){
+    _stockData[undoStockSi].available = (_stockData[undoStockSi].units||[]).filter(u=>u.available).length;
+    od.stockEdits = od.stockEdits||{};
+    od.stockEdits[entry.part] = {...(od.stockEdits[entry.part]||{}), available:_stockData[undoStockSi].available};
+  }
+  // Mark log entry as undone
+  log[actualIdx]._undone = true;
+  log[actualIdx].notes += ' [UNDONE]';
+  od.eventLog.push({ts:tsNow(),type:'undo',part:entry.part,user:soName,notes:'Undid check-in of '+entry.part});
+  saveOwnerData(od);
+
+  if(undoStockSi>=0) _stockExpanded.add(undoStockSi);
+  renderHub(); renderStock(); renderField(); renderReturned(); renderChangeLog();
+  showToast('Check-in undone — board restored to In the Field.');
+}
+
+function exportChangeLog(){
+  const od = loadOwnerData();
+  const log = (od.eventLog||[]).slice().reverse();
+  const header = 'Timestamp,Action,Part,Stock Owner,Details';
+  const rows = log.map(e=>[
+    '"'+(e.ts||'').replace(/"/g,'""')+'"',
+    '"'+(e.type||'').replace(/"/g,'""')+'"',
+    '"'+(e.part||'').replace(/"/g,'""')+'"',
+    '"'+(e.user||'').replace(/"/g,'""')+'"',
+    '"'+(e.notes||'').replace(/"/g,'""')+'"',
+  ].join(','));
+  const csv = header + '\n' + rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'emea_board_pool_changelog_' + todayIso() + '.csv';
+  a.click();
+  showToast('Change log exported!');
+}
+
 function initApp(){
   applyOwnerData();
   updateDataMgmtInfo();
@@ -2638,5 +3296,42 @@ document.querySelectorAll('.modal-overlay').forEach(overlay=>{
   });
 });
 </script>
+
+<!-- PAGE: CHANGE LOG -->
+<div class="page" id="page-log" style="padding-top:155px;">
+  <div style="padding:16px 24px 0;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+    <input type="text" id="log-search" placeholder="Search part or user…" oninput="renderChangeLog()"
+      style="padding:7px 12px;border:1px solid #dde;border-radius:4px;font-size:13px;width:240px;">
+    <select id="log-type" onchange="renderChangeLog()"
+      style="padding:7px 12px;border:1px solid #dde;border-radius:4px;font-size:13px;">
+      <option value="">All actions</option>
+      <option value="checkout">Checkout</option>
+      <option value="checkin">Check-In</option>
+      <option value="unit_edit">Unit Edit</option>
+      <option value="stock_edit">Stock Edit</option>
+      <option value="field_edit">Field Edit</option>
+      <option value="ret_edit">Return Edit</option>
+      <option value="add_board">Add Board</option>
+      <option value="delete">Delete</option>
+    </select>
+    <button onclick="exportChangeLog()"
+      style="padding:7px 16px;background:#1a252f;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;">
+      ⬇ Export CSV
+    </button>
+    <span id="log-count" style="font-size:12px;color:#999;margin-left:auto;"></span>
+  </div>
+  <div style="padding:12px 24px 40px;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);">
+      <thead><tr>
+        <th style="background:#1a252f;color:#fff;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:left;white-space:nowrap;">Timestamp</th>
+        <th style="background:#1a252f;color:#fff;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Action</th>
+        <th style="background:#1a252f;color:#fff;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Part #</th>
+        <th style="background:#1a252f;color:#fff;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Stock Owner</th>
+        <th style="background:#1a252f;color:#fff;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Details</th>
+      </tr></thead>
+      <tbody id="log-tbody"></tbody>
+    </table>
+  </div>
+</div>
 </body>
 </html>
