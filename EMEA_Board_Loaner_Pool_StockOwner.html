@@ -158,6 +158,8 @@ tr.edit-row td{background:#eaf4fb !important;padding:12px 16px;border-bottom:2px
 .btn-secondary:hover{background:#f5f5f5;}
 .btn-success{padding:9px 22px;font-size:13px;font-weight:700;border:none;border-radius:4px;background:#27ae60;color:#fff;cursor:pointer;}
 .btn-success:hover{background:#1e8449;}
+.btn-danger{padding:9px 22px;font-size:13px;font-weight:700;border:none;border-radius:4px;background:#c0392b;color:#fff;cursor:pointer;}
+.btn-danger:hover{background:#96281b;}
 
 /* Filter banner */
 .filter-banner{background:#fff3cd;border-left:4px solid #f59e0b;padding:8px 24px;font-size:12px;color:#856404;display:flex;align-items:center;gap:8px;}
@@ -235,6 +237,10 @@ tr.edit-row td{background:#eaf4fb !important;padding:12px 16px;border-bottom:2px
 .toast.error-toast{background:#e74c3c;}
 .toast.show{display:block;animation:fadeInUp .3s ease;}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+tr.ret-flash{animation:retFlash 2.4s ease-out forwards;}
+@keyframes retFlash{0%,15%{background:#fff3cd;outline:2px solid #f39c12;}80%{background:#fffdf0;outline:2px solid transparent;}100%{background:transparent;outline:none;}}
+tr.field-flash{animation:fieldFlash 2.4s ease-out forwards;}
+@keyframes fieldFlash{0%,15%{background:#e8f8e8;outline:2px solid #27ae60;}80%{background:#f5fff5;outline:2px solid transparent;}100%{background:transparent;outline:none;}}
 
 /* Readonly field */
 .readonly-field{padding:8px 10px;background:#f5f6fa;border:1px solid #e0e0e0;border-radius:4px;font-size:13px;color:#555;}
@@ -322,7 +328,6 @@ th.sort-desc::after{content:'▼';opacity:1;}
   <button class="tab-btn" id="tab-field" onclick="switchTab('field')">🌍 In the Field</button>
   <button class="tab-btn" id="tab-returned" onclick="switchTab('returned')">↩ Returned</button>
   <button class="tab-btn" id="tab-activity" onclick="switchTab('activity')">📈 Board Activity</button>
-  <button class="tab-btn" id="tab-notes" onclick="switchTab('notes')">💬 Notes &amp; Comments</button>
   <button class="tab-btn" id="tab-info" onclick="switchTab('info')">📋 Info &amp; How to Request</button>
   <button class="tab-btn" id="tab-log" onclick="switchTab('log')">🕐 Change Log</button>
 </div>
@@ -355,8 +360,6 @@ th.sort-desc::after{content:'▼';opacity:1;}
     </div>
     <div style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;">
       <button class="qa-btn qa-primary" onclick="openAddBoardModal()">+ Add Board</button>
-      <button class="qa-btn qa-green" onclick="exportOwnerData()">⬇ Export Changes</button>
-      <label class="qa-btn" style="cursor:pointer;">⬆ Import <input type="file" accept=".json" style="display:none" onchange="importOwnerData(this)"></label>
     </div>
   </div>
   <div class="kpi-row" id="hub-kpi-row">
@@ -436,6 +439,7 @@ th.sort-desc::after{content:'▼';opacity:1;}
       <option value="Munich Office">Munich Office</option>
       <option value="Paris Office">Paris Office</option>
     </select>
+    <button onclick="exportStockCSV()" style="padding:7px 16px;background:#1a252f;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;">⬇ Export CSV</button>
     <span class="result-count" id="s-count"></span>
   </div>
   <div id="stock-filter-banner" class="filter-banner" style="display:none;">
@@ -480,6 +484,7 @@ th.sort-desc::after{content:'▼';opacity:1;}
       <option value="Munich Office">Munich Office</option>
       <option value="Paris Office">Paris Office</option>
     </select>
+    <button onclick="exportFieldCSV()" style="padding:7px 16px;background:#1a252f;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;">⬇ Export CSV</button>
     <span class="result-count" id="f-count"></span>
   </div>
   <div id="field-filter-banner" class="filter-banner" style="display:none;">
@@ -513,6 +518,7 @@ th.sort-desc::after{content:'▼';opacity:1;}
 <div class="page" id="page-returned" style="padding-top:155px;">
   <div class="controls">
     <input type="text" id="r-search" placeholder="Search part, receiver, company…" oninput="renderReturned()">
+    <button onclick="exportRetCSV()" style="padding:7px 16px;background:#1a252f;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;">⬇ Export CSV</button>
     <span class="result-count" id="r-count"></span>
   </div>
   <div class="table-wrap">
@@ -529,8 +535,10 @@ th.sort-desc::after{content:'▼';opacity:1;}
           <th class="sortable" id="rth-ship" onclick="setSortRet('shipped')">Shipped</th>
           <th class="sortable" id="rth-ret" onclick="setSortRet('returned')">Returned</th>
           <th class="sortable" id="rth-cond" onclick="setSortRet('condition')">Condition</th>
+          <th class="sortable" id="rth-hw" onclick="setSortRet('hwTests')">HW Tests</th>
           <th class="sortable" id="rth-sa" onclick="setSortRet('sa')">SA Number</th>
           <th>Notes</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="ret-tbody"></tbody>
@@ -548,13 +556,13 @@ th.sort-desc::after{content:'▼';opacity:1;}
     <table id="act-table">
       <thead>
         <tr>
-          <th>Part #</th>
-          <th>Description</th>
-          <th>Shipped</th>
-          <th>Returned</th>
-          <th>Countries</th>
-          <th>Last Checkout</th>
-          <th>Last Return</th>
+          <th class="sortable" id="ath-part" onclick="setSortAct('part')">Part #</th>
+          <th class="sortable" id="ath-desc" onclick="setSortAct('description')">Description</th>
+          <th class="sortable" id="ath-ship" onclick="setSortAct('shipped')">Shipped</th>
+          <th class="sortable" id="ath-ret"  onclick="setSortAct('returned')">Returned</th>
+          <th class="sortable" id="ath-ctr"  onclick="setSortAct('countries')">Countries</th>
+          <th class="sortable" id="ath-lship" onclick="setSortAct('last_shipped')">Last Checkout</th>
+          <th class="sortable" id="ath-lret"  onclick="setSortAct('last_returned')">Last Return</th>
         </tr>
       </thead>
       <tbody id="act-tbody"></tbody>
@@ -563,7 +571,7 @@ th.sort-desc::after{content:'▼';opacity:1;}
 </div>
 
 <!-- PAGE: NOTES & COMMENTS -->
-<div class="page" id="page-notes" style="padding-top:155px;">
+<div class="page" id="page-notes-removed" style="display:none;">
   <div class="notes-layout">
     <div class="notes-sidebar">
       <div style="padding:12px 16px;border-bottom:1px solid #e0e0e0;font-size:12px;font-weight:700;color:#1a252f;text-transform:uppercase;letter-spacing:.04em;">Boards</div>
@@ -847,6 +855,29 @@ th.sort-desc::after{content:'▼';opacity:1;}
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal('add-board-modal')">Cancel</button>
       <button class="btn-primary" onclick="submitAddBoard()">Add Board</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete-confirm modal -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span>🗑 Remove Entry</span>
+        <button class="modal-close" onclick="closeModal('del-modal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <p id="del-modal-desc" style="margin:0 0 16px;font-size:14px;color:#444;line-height:1.5;"></p>
+      <div class="form-field">
+        <label>Reason for removal <span class="req" style="color:#c0392b">*</span></label>
+        <textarea id="del-reason" rows="3" placeholder="Required — explain why this entry is being removed…" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #bdc3c7;border-radius:4px;font-size:13px;resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('del-modal')">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()">Remove Entry</button>
     </div>
   </div>
 </div>
@@ -1377,6 +1408,28 @@ function applyOwnerData(){
     });
   }
 
+  // Filter out manually removed return records (runs AFTER all _retData pushes)
+  const removedRetKeys = new Set((od.removedRetRows||[]).map(function(r){ return r.key; }));
+  if(removedRetKeys.size > 0){
+    _retData = _retData.filter(function(r){
+      const key = r._checkinId
+        ? 'ci_'+r._checkinId
+        : 'ret_'+r.part+'__'+(r.returned_iso||r.returned_date||'')+'__'+(r.sa_number||'');
+      return !removedRetKeys.has(key);
+    });
+  }
+
+  // Apply saved return-record edits (runs after filter so removed rows are gone)
+  const retEdits = od.retEdits||{};
+  if(Object.keys(retEdits).length > 0){
+    _retData.forEach(function(r){
+      const key = r._checkinId
+        ? 'ci_'+r._checkinId
+        : 'ret_'+r.part+'__'+(r.returned_iso||r.returned_date||'')+'__'+(r.sa_number||'');
+      if(retEdits[key]) Object.assign(r, retEdits[key]);
+    });
+  }
+
   // Apply field edits
   for(const [idx, edits] of Object.entries(od.fieldEdits||{})){
     const i = parseInt(idx);
@@ -1444,8 +1497,8 @@ const PAGE_RENDER = {
   field:    renderField,
   returned: renderReturned,
   activity: renderActivity,
-  notes:    renderNotes,
   info:     renderInfo,
+  log:      renderChangeLog,
 };
 
 function switchTab(n){
@@ -1462,7 +1515,6 @@ function renderAll(){
   renderField();
   renderReturned();
   renderActivity();
-  renderNotes();
   renderInfo();
 }
 
@@ -1795,8 +1847,9 @@ function setStockKpi(filter){
 
 // ── Column sorting state ──────────────────────────────────────
 var _stockSort  = {col:null, dir:'asc'};
-var _fieldSort  = {col:null, dir:'asc'};
-var _retSort    = {col:null, dir:'asc'};
+var _fieldSort  = {col:'shipped', dir:'desc'};   // default: latest shipped first
+var _retSort    = {col:'returned', dir:'desc'};  // default: latest returned first
+var _actSort    = {col:'shipped', dir:'desc'};   // default: most shipped first
 
 function applySort(rows, sort, colMap){
   if(!sort.col) return rows;
@@ -1829,6 +1882,11 @@ function setSortRet(col){
   if(_retSort.col===col) _retSort.dir=_retSort.dir==='asc'?'desc':'asc';
   else { _retSort.col=col; _retSort.dir='asc'; }
   renderReturned();
+}
+function setSortAct(col){
+  if(_actSort.col===col) _actSort.dir=_actSort.dir==='asc'?'desc':'asc';
+  else { _actSort.col=col; _actSort.dir='desc'; }  // numeric cols default desc
+  renderActivity();
 }
 
 function sortClass(sort, col){
@@ -2215,25 +2273,6 @@ function renderField(){
     return;
   }
 
-  rows = applySort(rows, _retSort, {
-    part:        function(r){ return r.part||''; },
-    description: function(r){ return r.description||''; },
-    office:      function(r){ return r.office||''; },
-    receiver:    function(r){ return r.receiver||''; },
-    company:     function(r){ return r.company||''; },
-    country:     function(r){ return r.country||''; },
-    shipped:     function(r){ return r.shipped_iso||''; },
-    returned:    function(r){ return r.returned_iso||r.returned_date||''; },
-    condition:   function(r){ return r.condition||''; },
-    sa:          function(r){ return r.sa_number||''; },
-  });
-  var rthMap={part:'rth-part',description:'rth-desc',office:'rth-off',receiver:'rth-recv',
-    company:'rth-comp',country:'rth-ctr',shipped:'rth-ship',returned:'rth-ret',
-    condition:'rth-cond',sa:'rth-sa'};
-  Object.keys(rthMap).forEach(function(k){
-    var el=document.getElementById(rthMap[k]);
-    if(el) el.className=sortClass(_retSort,k);
-  });
   let html='';
   rows.forEach(r=>{
     const fi = _fieldData.indexOf(r);
@@ -2248,7 +2287,9 @@ function renderField(){
     ? '<button class="checkin-btn" onclick="openCheckin('+fi+')">Check-In</button>'
       + ' <button onclick="removeFieldRow('+fi+')" title="Remove this entry" style="margin-left:4px;padding:3px 8px;font-size:11px;font-weight:700;border:1px solid #c0392b;border-radius:3px;background:#fff;color:#c0392b;cursor:pointer;">🗑</button>'
     : '<span style="font-size:11px;color:#bbb;">View only</span>';
-  html += '<tr' + (days!==null&&days>90?' class="stale"':'') + '>';
+  var isNewCheckout = (_lastCheckoutId && r._checkoutId===_lastCheckoutId);
+  var rowClass = isNewCheckout ? 'field-flash' : (days!==null&&days>90?'stale':'');
+  html += '<tr' + (rowClass?' class="'+rowClass+'"':'') + '>';
   html += '<td class="edit-col">' + fEditCell + '</td>';
   html += '<td class="b-part">' + partLink(r.part) + '</td>';
   html += '<td class="b-name">' + esc(r.description) + '</td>';
@@ -2295,10 +2336,66 @@ function toggleFieldEdit(fi,cb){
 function cancelFieldEdit(){ _fieldEditOpen=-1; renderField(); }
 
 
+// ── Shared delete-confirm modal ───────────────────────────────
+function openDeleteModal(type, idx){
+  const r = type==='ret' ? _retData[idx] : _fieldData[idx];
+  if(!r) return;
+  _delPending = {type, idx, part:r.part};
+  const label = type==='ret'
+    ? `"${r.part}" returned record (receiver: ${r.receiver||'—'}, date: ${r.returned_date||'—'})`
+    : `"${r.part}" field entry (receiver: ${r.receiver||'—'})`;
+  document.getElementById('del-modal-desc').textContent =
+    'You are about to permanently remove: ' + label + '. This action will be logged in the Change Log.';
+  document.getElementById('del-reason').value='';
+  openModal('del-modal');
+  setTimeout(()=>document.getElementById('del-reason').focus(), 200);
+}
+
+function confirmDelete(){
+  if(!_delPending) return;
+  const reason = document.getElementById('del-reason').value.trim();
+  if(!reason){ showToast('⚠ A reason is required before removing an entry.', true); return; }
+  if(_delPending.type==='ret'){
+    _doRemoveRetRow(_delPending.idx, reason);
+  } else {
+    _doRemoveFieldRow(_delPending.idx, reason);
+  }
+  closeModal('del-modal');
+  _delPending = null;
+}
+
+function removeRetRow(ri){
+  openDeleteModal('ret', ri);
+}
+
+function _doRemoveRetRow(ri, reason){
+  const r = _retData[ri];
+  if(!r) return;
+  const od = loadOwnerData();
+  od.removedRetRows = od.removedRetRows||[];
+  // Build a stable key: prefer _checkinId, fall back to composite
+  const rowKey = r._checkinId
+    ? 'ci_'+r._checkinId
+    : 'ret_'+r.part+'__'+(r.returned_iso||r.returned_date||'')+'__'+(r.sa_number||'');
+  od.removedRetRows.push({key:rowKey, part:r.part, ts:tsNow(), removedBy:soName, reason:reason});
+  od.eventLog = od.eventLog||[];
+  od.eventLog.push({ts:tsNow(), type:'ret_remove', part:r.part, user:soName,
+    notes:'Return record removed — Reason: '+reason});
+  saveOwnerData(od);
+  _retData.splice(ri, 1);
+  _retEditOpen = -1;
+  renderReturned();
+  renderChangeLog();
+  showToast('Return record removed and logged.');
+}
+
 function removeFieldRow(fi){
+  openDeleteModal('field', fi);
+}
+
+function _doRemoveFieldRow(fi, reason){
   const r = _fieldData[fi];
   if(!r) return;
-  if(!confirm('Remove "'+r.part+'" ('+r.receiver+') from the In the Field list?\n\nThis will hide it from the field view. Use the Change Log to undo.')) return;
 
   // Track removal so applyOwnerData doesn't re-add it
   const od = loadOwnerData();
@@ -2309,7 +2406,7 @@ function removeFieldRow(fi){
     return f.part===r.part && (!r._checkoutId);
   });
   const rowKey = r.part+'__'+(originalIdx>=0?originalIdx:fi);
-  od.removedFieldRows.push({key:rowKey, part:r.part, ts:tsNow(), removedBy:soName});
+  od.removedFieldRows.push({key:rowKey, part:r.part, ts:tsNow(), removedBy:soName, reason:reason});
 
   // Also remove from od.checkouts if it was a checkout-originated row
   if(r._checkoutId){
@@ -2323,12 +2420,12 @@ function removeFieldRow(fi){
       od.checkins.push({id:genId(), ts:tsNow(), checkoutId:r._checkoutId,
         part:r.part, returned_date:'Removed', returned_iso:todayIso(),
         kitContents:'Removed by Stock Owner', hwTests:'N/A',
-        soName:soName, soOffice:soOffice, notes:'Manually removed from field'});
+        soName:soName, soOffice:soOffice, notes:'Manually removed from field — '+reason});
     }
   }
 
   od.eventLog.push({ts:tsNow(), type:'field_remove', part:r.part, user:soName,
-    notes:'Manually removed field entry: '+r.part+' / '+r.receiver});
+    notes:'Field entry removed — Reason: '+reason+' ('+r.part+' / '+(r.receiver||'—')+')'});
   saveOwnerData(od);
 
   // Remove from in-memory _fieldData
@@ -2364,6 +2461,7 @@ function saveFieldEdit(fi){
 // RETURNED TAB
 // ══════════════════════════════════════════════════════════════
 let _retEditOpen=-1;
+let _delPending=null; // {type:'field'|'ret', idx:number, key:string, part:string, label:string}
 
 function renderReturned(){
   const search=(document.getElementById('r-search').value||'').toLowerCase();
@@ -2378,17 +2476,43 @@ function renderReturned(){
 
   const tbody=document.getElementById('ret-tbody');
   if(rows.length===0){
-    tbody.innerHTML='<tr><td colspan="12" class="no-results">No returned boards.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="14" class="no-results">No returned boards.</td></tr>';
     return;
   }
+
+  rows = applySort(rows, _retSort, {
+    part:        function(r){ return r.part||''; },
+    description: function(r){ return r.description||''; },
+    office:      function(r){ return r.office||''; },
+    receiver:    function(r){ return r.receiver||''; },
+    company:     function(r){ return r.company||''; },
+    country:     function(r){ return r.country||''; },
+    shipped:     function(r){ return r.shipped_iso||''; },
+    returned:    function(r){ return r.returned_iso||r.returned_date||''; },
+    condition:   function(r){ return r.condition||''; },
+    hwTests:     function(r){ return r.hwTests||''; },
+    sa:          function(r){ return r.sa_number||''; },
+  });
+  var rthMap={part:'rth-part',description:'rth-desc',office:'rth-off',receiver:'rth-recv',
+    company:'rth-comp',country:'rth-ctr',shipped:'rth-ship',returned:'rth-ret',
+    condition:'rth-cond',hwTests:'rth-hw',sa:'rth-sa'};
+  Object.keys(rthMap).forEach(function(k){
+    var el=document.getElementById(rthMap[k]);
+    if(el) el.className=sortClass(_retSort,k);
+  });
 
   let html='';
   rows.forEach(r=>{
     const ri=_retData.indexOf(r);
     const isEdit=_retEditOpen===ri;
-    const condColor=r.condition==='Good'?'#27ae60':r.condition==='Minor Wear'?'#e67e22':'#c0392b';
+    const condColor = (r.condition==='Good'||r.condition==='Complete')
+      ? '#27ae60'
+      : (r.condition==='Minor Wear'||r.condition==='Missing Parts (see notes)')
+        ? '#e67e22'
+        : '#c0392b';
 
-    html+=`<tr>
+    const isNew = (_lastCheckinId && r._checkinId===_lastCheckinId);
+    html+=`<tr${isNew?' class="ret-flash"':''}>
       <td class="edit-col"><input type="checkbox" class="edit-cb" ${isEdit?'checked':''} onchange="toggleRetEdit(${ri},this)"></td>
       <td class="b-part">${partLink(r.part)}</td>
       <td class="b-name">${esc(r.description)}</td>
@@ -2399,11 +2523,13 @@ function renderReturned(){
       <td>${esc(r.shipped_date||'—')}</td>
       <td>${esc(r.returned_date||'—')}</td>
       <td><span style="color:${condColor};font-weight:700;font-size:12px;">${esc(r.condition||'—')}</span></td>
+      <td style="font-size:12px;">${esc(r.hwTests||'—')}</td>
       <td>${esc(r.sa_number||'—')}</td>
       <td style="font-size:12px;">${esc(r.notes||'')}</td>
+      <td class="actions-cell"><button onclick="removeRetRow(${ri})" title="Remove this return record" style="padding:3px 8px;font-size:11px;font-weight:700;border:1px solid #c0392b;border-radius:3px;background:#fff;color:#c0392b;cursor:pointer;">🗑</button></td>
     </tr>`;
     if(isEdit){
-      html+=`<tr class="edit-row"><td colspan="12">
+      html+=`<tr class="edit-row"><td colspan="14">
         <div class="ie-wrap">
           <div class="ie-field"><label>Receiver</label><input type="text" id="rie-rec" value="${esc(r.receiver||'')}"></div>
           <div class="ie-field"><label>Company</label><input type="text" id="rie-co" value="${esc(r.company||'')}"></div>
@@ -2431,21 +2557,38 @@ function toggleRetEdit(ri,cb){if(cb.checked){_retEditOpen=ri;}else{_retEditOpen=
 function cancelRetEdit(){_retEditOpen=-1;renderReturned();}
 function saveRetEdit(ri){
   const r=_retData[ri];
+  // Compute stable key BEFORE applying edits (uses original row identifiers)
+  const retKey = r._checkinId
+    ? 'ci_'+r._checkinId
+    : 'ret_'+r.part+'__'+(r.returned_iso||r.returned_date||'')+'__'+(r.sa_number||'');
+
   const edits={
-    receiver: document.getElementById('rie-rec').value,
-    company:  document.getElementById('rie-co').value,
-    country:  document.getElementById('rie-ctr').value,
-    sa_number:document.getElementById('rie-sa').value,
+    receiver:     document.getElementById('rie-rec').value,
+    company:      document.getElementById('rie-co').value,
+    country:      document.getElementById('rie-ctr').value,
+    sa_number:    document.getElementById('rie-sa').value,
     returned_date:document.getElementById('rie-ret').value,
-    condition:document.getElementById('rie-cond').value,
-    notes:    document.getElementById('rie-notes').value,
+    condition:    document.getElementById('rie-cond').value,
+    notes:        document.getElementById('rie-notes').value,
   };
-  Object.assign(r,edits);
+
+  // Build a human-readable summary of what changed
+  const changed = Object.keys(edits).filter(k=>edits[k]!==(r[k]||''));
+  const changeSummary = changed.length
+    ? changed.map(k=>k.replace(/_/g,' ')+': "'+edits[k]+'"').join('; ')
+    : 'No changes';
+
+  Object.assign(r, edits);
+
   const od=loadOwnerData();
-  od.eventLog.push({ts:tsNow(),type:'ret_edit',part:r.part,user:soName,notes:'Return record edited'});
+  od.retEdits = od.retEdits||{};
+  od.retEdits[retKey] = Object.assign({}, od.retEdits[retKey]||{}, edits);
+  od.eventLog.push({ts:tsNow(), type:'ret_edit', part:r.part, user:soName,
+    notes:'Return record edited — '+changeSummary});
   saveOwnerData(od);
   _retEditOpen=-1;
   renderReturned();
+  renderChangeLog();
   showToast('Return record updated!');
 }
 
@@ -2486,6 +2629,23 @@ function renderActivity(){
            (r.description||'').toLowerCase().includes(search);
   });
   document.getElementById('a-count').textContent=`${rows.length} board${rows.length===1?'':'s'}`;
+
+  rows = applySort(rows, _actSort, {
+    part:         function(r){ return r.part||''; },
+    description:  function(r){ return r.description||''; },
+    shipped:      function(r){ return r.shipped_count||0; },
+    returned:     function(r){ return r.returned_count||0; },
+    countries:    function(r){ return r.countries_count||0; },
+    last_shipped: function(r){ return r.last_shipped||''; },
+    last_returned:function(r){ return r.last_returned||''; },
+  });
+  var athMap={part:'ath-part',description:'ath-desc',shipped:'ath-ship',
+    returned:'ath-ret',countries:'ath-ctr',last_shipped:'ath-lship',last_returned:'ath-lret'};
+  Object.keys(athMap).forEach(function(k){
+    var el=document.getElementById(athMap[k]);
+    if(el) el.className=sortClass(_actSort,k);
+  });
+
   const tbody=document.getElementById('act-tbody');
   if(rows.length===0){tbody.innerHTML='<tr><td colspan="7" class="no-results">No activity data.</td></tr>';return;}
   tbody.innerHTML=rows.map(r=>`<tr>
@@ -2504,7 +2664,9 @@ function renderActivity(){
 // ══════════════════════════════════════════════════════════════
 let _notesSelectedPart = null;
 
-function renderNotes(){
+function renderNotes(){ /* tab removed */ }
+
+function _renderNotes_removed(){
   const od=loadOwnerData();
   const allParts=[..._stockData,..._fieldData,..._retData].map(r=>r.part).filter(Boolean);
   const uniq=[...new Set(allParts)].sort();
@@ -2524,10 +2686,7 @@ function renderNotes(){
   if(_notesSelectedPart) renderNoteThread(_notesSelectedPart);
 }
 
-function selectNoteBoard(part){
-  _notesSelectedPart=part;
-  renderNotes();
-}
+function selectNoteBoard(part){ /* tab removed */ }
 
 function renderNoteThread(part){
   const od=loadOwnerData();
@@ -2564,16 +2723,7 @@ function renderNoteThread(part){
   `;
 }
 
-function postComment(part){
-  const text=(document.getElementById('note-textarea').value||'').trim();
-  if(!text){showToast('Please enter a comment.',true);return;}
-  const od=loadOwnerData();
-  if(!od.boardComments[part]) od.boardComments[part]=[];
-  od.boardComments[part].push({ts:tsNow(), author:soName, text});
-  saveOwnerData(od);
-  renderNotes();
-  showToast('Comment posted!');
-}
+function postComment(part){ /* tab removed */ }
 
 // ══════════════════════════════════════════════════════════════
 // INFO & HOW TO REQUEST TAB
@@ -2638,6 +2788,7 @@ function clearRequests(){
 // ══════════════════════════════════════════════════════════════
 let _coStockIdx=-1;
 let _checkoutUnitRef=null;
+let _lastCheckoutId=null;
 
 function openCheckout(si, unit=null){
   _checkoutUnitRef=null;  // BUG-3 fix: clear any stale unit ref from a previously cancelled unit-level checkout
@@ -2808,11 +2959,23 @@ function submitCheckout(){
     office:co.office||soOffice, _checkoutId:co.id,
   });
 
+  _lastCheckoutId = co.id;
+
   closeModal('co-modal');
   renderHub();
   renderStock();
   renderField();
-  showToast('Checkout recorded!');
+  showToast('✅ Checkout recorded — board added to In the Field tab!');
+
+  // Switch to In the Field tab and scroll to the highlighted new row
+  setTimeout(()=>{
+    switchTab('field');
+    const flashRow = document.querySelector('tr.field-flash');
+    if(flashRow) flashRow.scrollIntoView({behavior:'smooth', block:'center'});
+    // Clear highlight after animation finishes
+    setTimeout(()=>{ _lastCheckoutId = null; renderField(); }, 2500);
+  }, 150);
+
   try {
     generateCheckoutEmail(co, r);
   } catch(emailErr) {
@@ -2826,6 +2989,7 @@ function submitCheckout(){
 let _ciFieldIdx=-1;
 let _ciSyntheticRow=null;
 let _ciUnitRef=null;
+let _lastCheckinId=null;
 
 function openCheckin(fi, syntheticRow=null){
   _ciFieldIdx=fi;
@@ -2908,7 +3072,8 @@ function submitCheckin(){
     part:r.part, serial:r.serial||'', description:r.description,
     sa_number:r.sa_number||'', qty:1,
     shipped_date:r.shipped_date||'', shipped_iso:r.shipped_iso||'',
-    returned_date:ci.returned_date,   receiver:r.receiver||'',
+    returned_date:ci.returned_date,   returned_iso:ci.returned_iso||retDate||todayIso(),
+    receiver:r.receiver||'',
     company:r.company||'', country:r.country||'',
     office:r.office||r.owner||soOffice,
     condition:kitContents, hwTests:hwTests, notes:notes,
@@ -2940,6 +3105,7 @@ function submitCheckin(){
   saveOwnerData(od);
 
   _ciUnitRef = null;
+  _lastCheckinId = ci.id;
 
   // ── 5: Render then email ──────────────────────────────────
   closeModal('ci-modal');
@@ -2949,7 +3115,17 @@ function submitCheckin(){
   renderField();
   renderReturned();
   renderChangeLog();
-  showToast('Check-in recorded!');
+  showToast('✅ Check-in recorded — board added to Returned tab!');
+
+  // Switch to Returned tab and scroll to the highlighted new row
+  setTimeout(()=>{
+    switchTab('returned');
+    const flashRow = document.querySelector('tr.ret-flash');
+    if(flashRow) flashRow.scrollIntoView({behavior:'smooth', block:'center'});
+    // Clear highlight after animation finishes
+    setTimeout(()=>{ _lastCheckinId = null; renderReturned(); }, 2500);
+  }, 150);
+
   // Generate email separately with explicit error feedback
   try {
     generateCheckinEmail(ci, r);
@@ -2976,25 +3152,68 @@ function openAddBoardModal(){
 }
 
 function submitAddBoard(){
-  const part=document.getElementById('ab-part').value.trim();
-  const desc=document.getElementById('ab-desc').value.trim();
-  const office=document.getElementById('ab-office').value;
-  if(!part||!desc||!office){showToast('Part #, Description and Office are required.',true);return;}
+  const part     = document.getElementById('ab-part').value.trim();
+  const desc     = document.getElementById('ab-desc').value.trim();
+  const office   = document.getElementById('ab-office').value;
+  if(!part||!desc||!office){ showToast('Part #, Description and Office are required.', true); return; }
 
-  const newRow={
-    part, description:desc, total_qty:parseInt(document.getElementById('ab-total').value)||1,
-    available:parseInt(document.getElementById('ab-avail').value)||1,
-    offices:[office], office,
-    location:document.getElementById('ab-location').value.trim(),
-    serial:document.getElementById('ab-serial').value.trim(),
-    notes:document.getElementById('ab-notes').value.trim(),
-    _new:true,
+  const totalQty = Math.max(1, parseInt(document.getElementById('ab-total').value)||1);
+  const availQty = Math.min(totalQty, Math.max(0, parseInt(document.getElementById('ab-avail').value)||1));
+  const serial   = document.getElementById('ab-serial').value.trim();
+  const location = document.getElementById('ab-location').value.trim();
+  const notes    = document.getElementById('ab-notes').value.trim();
+
+  // Build per-unit rows — first unit gets the serial from the field
+  const units = [];
+  for(let i = 0; i < totalQty; i++){
+    units.push({ serial: i===0 ? serial : '', available: i < availQty, office, loaned_to: '' });
+  }
+
+  // ── Check if part already exists ────────────────────────────
+  const existingIdx = _stockData.findIndex(function(s){ return s.part===part; });
+  if(existingIdx >= 0){
+    const ex = _stockData[existingIdx];
+    const existingUnits = (ex.total_qty||0);
+    const existingOffices = (ex.offices||[ex.office||'']).join(', ');
+    if(!confirm(
+      `"${part}" already exists in inventory (${existingUnits} unit(s) across ${existingOffices}).\n\n` +
+      `Add ${totalQty} more unit(s) to this existing record?\n\n` +
+      `• New unit(s) will be assigned to: ${office}\n` +
+      (serial ? `• Serial for unit 1: ${serial}\n` : '') +
+      `\nClick OK to merge, Cancel to abort.`
+    )) return;
+
+    // Merge into existing row
+    ex.total_qty  = (ex.total_qty||0) + totalQty;
+    ex.available  = (ex.available||0)  + availQty;
+    ex.units      = ex.units||[];
+    units.forEach(function(u){ ex.units.push(u); });
+    if(!ex.offices) ex.offices = [];
+    if(!ex.offices.includes(office)) ex.offices.push(office);
+
+    const od = loadOwnerData();
+    od.stockEdits[part] = JSON.parse(JSON.stringify(ex));
+    od.eventLog.push({ ts:tsNow(), type:'add_board', part, user:soName,
+      notes:`Added ${totalQty} unit(s) to existing "${part}" — office: ${office}${serial?' | serial: '+serial:''}` });
+    saveOwnerData(od);
+    closeModal('add-board-modal');
+    renderStock();
+    renderHub();
+    showToast(`${totalQty} unit(s) added to existing "${part}"!`);
+    return;
+  }
+
+  // ── New part ─────────────────────────────────────────────────
+  const newRow = {
+    part, description:desc, total_qty:totalQty, available:availQty,
+    offices:[office], office, location, serial, notes, units, _new:true,
   };
   _stockData.push(newRow);
 
-  const od=loadOwnerData();
-  od.stockEdits[part]={...newRow};
-  od.eventLog.push({ts:tsNow(),type:'add_board',part,user:soName,notes:`Added new board: ${desc}`});
+  const od = loadOwnerData();
+  od.stockEdits[part] = JSON.parse(JSON.stringify(newRow));
+  od.eventLog.push({ ts:tsNow(), type:'add_board', part, user:soName,
+    notes:`Added new board: ${desc} (${totalQty} unit(s), office: ${office}${serial?' | serial: '+serial:''})` });
   saveOwnerData(od);
 
   closeModal('add-board-modal');
@@ -3124,8 +3343,11 @@ const LOG_LABELS = {
   stock_edit: {label:'Stock Edit',  color:'#e67e22'},
   field_edit: {label:'Field Edit',  color:'#e67e22'},
   ret_edit:   {label:'Return Edit', color:'#e67e22'},
-  add_board:  {label:'Add Board',   color:'#16a085'},
-  delete:     {label:'Delete',      color:'#c0392b'},
+  add_board:    {label:'Add Board',      color:'#16a085'},
+  delete:       {label:'Delete',         color:'#c0392b'},
+  field_remove: {label:'Field Removed',  color:'#c0392b'},
+  ret_remove:   {label:'Return Removed', color:'#c0392b'},
+  undo:         {label:'Undo',           color:'#7c3aed'},
 };
 
 function renderChangeLog(){
@@ -3318,6 +3540,69 @@ function exportChangeLog(){
   showToast('Change log exported!');
 }
 
+function exportStockCSV(){
+  function q(v){ return '"'+(v||'').toString().replace(/"/g,'""')+'"'; }
+  const header = 'Part,Description,Office(s),Total QTY,Available,Location,Notes';
+  const rows = [];
+  _stockData.forEach(function(r){
+    const offices = (r.offices||[r.office||'']).join('; ');
+    // One summary row per part
+    rows.push([
+      q(r.part), q(r.description), q(offices),
+      q(r.total_qty||r.total||''), q(r.available||0),
+      q(r.location||r.loc||''), q(r.notes||''),
+    ].join(','));
+    // One sub-row per unit (serial level)
+    (r.units||[]).forEach(function(u, ui){
+      rows.push([
+        q(r.part), q('  Unit '+(ui+1)), q(u.office||offices),
+        q('1'), q(u.available===false?'0':'1'),
+        q(r.location||r.loc||''), q(u.serial||''),
+      ].join(','));
+    });
+  });
+  const csv = header+'\n'+rows.join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'emea_board_pool_stock_'+todayIso()+'.csv';
+  a.click();
+  showToast('Stock overview exported!');
+}
+
+function exportFieldCSV(){
+  function q(v){ return '"'+(v||'').toString().replace(/"/g,'""')+'"'; }
+  const header = 'Part,Description,Office,Receiver,Company,Country,Shipped Date,Days Out,SA Number,Expected Return,Notes';
+  const rows = _fieldData.map(r=>[
+    q(r.part), q(r.description), q(r.office||r.owner||''),
+    q(r.receiver), q(r.company), q(r.country),
+    q(r.shipped_date), q(daysAgo(r.shipped_iso)!==null?daysAgo(r.shipped_iso)+'d':''),
+    q(r.sa_number), q(r.expected_return), q(r.notes),
+  ].join(','));
+  const csv = header+'\n'+rows.join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'emea_board_pool_field_'+todayIso()+'.csv';
+  a.click();
+  showToast('In the Field exported!');
+}
+
+function exportRetCSV(){
+  function q(v){ return '"'+(v||'').toString().replace(/"/g,'""')+'"'; }
+  const header = 'Part,Description,Office,Receiver,Company,Country,Shipped Date,Returned Date,Condition,HW Tests,SA Number,Notes';
+  const rows = _retData.map(r=>[
+    q(r.part), q(r.description), q(r.office||r.owner||''),
+    q(r.receiver), q(r.company), q(r.country),
+    q(r.shipped_date), q(r.returned_date),
+    q(r.condition), q(r.hwTests), q(r.sa_number), q(r.notes),
+  ].join(','));
+  const csv = header+'\n'+rows.join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'emea_board_pool_returned_'+todayIso()+'.csv';
+  a.click();
+  showToast('Returned records exported!');
+}
+
 // ══════════════════════════════════════════════════════════════
 // VERSION WATCHER — detects external changes & stale sessions
 // ══════════════════════════════════════════════════════════════
@@ -3391,12 +3676,15 @@ document.querySelectorAll('.modal-overlay').forEach(overlay=>{
       <option value="">All actions</option>
       <option value="checkout">Checkout</option>
       <option value="checkin">Check-In</option>
+      <option value="field_remove">Field Removed</option>
+      <option value="ret_remove">Return Removed</option>
       <option value="unit_edit">Unit Edit</option>
       <option value="stock_edit">Stock Edit</option>
       <option value="field_edit">Field Edit</option>
       <option value="ret_edit">Return Edit</option>
       <option value="add_board">Add Board</option>
       <option value="delete">Delete</option>
+      <option value="undo">Undo</option>
     </select>
     <button onclick="exportChangeLog()"
       style="padding:7px 16px;background:#1a252f;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;">
